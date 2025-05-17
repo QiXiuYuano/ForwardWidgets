@@ -8,35 +8,35 @@ WidgetMetadata = {
     requiredVersion: "0.0.1",
     modules: [
       // 热门影片模块
-      {
-        title: "热门影片",
-        description: "热门影片",
-        requiresWebView: false,
-        functionName: "loadPage",
-        params: [
-          {
-            name: "url",
-            title: "列表地址",
-            type: "constant",
-            description: "列表地址",
-            value:
-              "https://jable.tv/hot/?mode=async&function=get_block&block_id=list_videos_common_videos_list",
-          },
-          {
-            name: "sort_by",
-            title: "排序",
-            type: "enumeration",
-            description: "排序",
-            enumOptions: [
-              { title: "所有时间", value: "video_viewed" },
-              { title: "本月热门", value: "video_viewed_month" },
-              { title: "本周热门", value: "video_viewed_week" },
-              { title: "今日热门", value: "video_viewed_today" },
-            ],
-          },
-          { name: "from", title: "页码", type: "page", description: "页码", value: "1" },
-        ],
-      },
+      // {
+      //   title: "热门影片",
+      //   description: "热门影片",
+      //   requiresWebView: false,
+      //   functionName: "loadPage",
+      //   params: [
+      //     {
+      //       name: "url",
+      //       title: "列表地址",
+      //       type: "constant",
+      //       description: "列表地址",
+      //       value:
+      //         "https://jable.tv/hot/?mode=async&function=get_block&block_id=list_videos_common_videos_list",
+      //     },
+      //     {
+      //       name: "sort_by",
+      //       title: "排序",
+      //       type: "enumeration",
+      //       description: "排序",
+      //       enumOptions: [
+      //         { title: "所有时间", value: "video_viewed" },
+      //         { title: "本月热门", value: "video_viewed_month" },
+      //         { title: "本周热门", value: "video_viewed_week" },
+      //         { title: "今日热门", value: "video_viewed_today" },
+      //       ],
+      //     },
+      //     { name: "from", title: "页码", type: "page", description: "页码", value: "1" },
+      //   ],
+      // },
       {
         title: "UP主投稿视频",
         description: "获取指定UP主的投稿视频",
