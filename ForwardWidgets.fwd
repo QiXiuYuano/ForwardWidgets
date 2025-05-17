@@ -1,10 +1,10 @@
 {
-  "title": "Personal Collection Widgets",
+  "title": "Widgets For QiXiuYuano",
   "description": "整合豆瓣、猫眼、TMDB、IMDB等平台的热门榜单与精选内容",
   "icon": "https://raw.githubusercontent.com/QiXiuYuano/ForwardWidgets/refs/heads/main/icon.png",
   "widgets": [
     {
-      "id": "Trakt",
+      "id": "trakt",
       "title": "Trakt我看&Trakt个性化推荐",
       "description": "解析Trakt想看、在看、已看、片单、追剧日历以及根据个人数据生成的个性化推荐【五折码：CHEAP.5;七折码：CHEAP】",
       "requiredVersion": "0.0.1",
