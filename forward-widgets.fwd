@@ -1,0 +1,16 @@
+{
+  "title": "Forward Widgets",
+  "description": "Forward Official Widgets",
+  "icon": "https://assets.vvebo.vip/scripts/icon.png",
+  "widgets": [
+    {
+      "id": "forward.bilibiliup",
+      "title": "BilibiliUP",
+      "description": "获取关注UP主的视频",
+      "requiredVersion": "0.0.1",
+      "version": "1.0.0",
+      "author": "Forward",
+      "url": "https://assets.vvebo.vip/scripts/tmdb.js"
+    }
+  ]
+}
