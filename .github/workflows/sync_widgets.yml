@@ -1,7 +1,7 @@
 name: Sync Widgets
 on:
   schedule:
-    - cron: '0 3 * * *' 
+    - cron: '0 7 * * *'
   workflow_dispatch:
 jobs:
   sync:
@@ -17,19 +17,38 @@ jobs:
       - name: Install requests
         run: pip install requests
       - name: Sync widgets
+        id: sync_script # 添加 ID 以引用此步骤的输出
         run: python .github/scripts/sync_widgets.py
       - name: Commit and push changes
+        # 只有当脚本输出 status 为 'updated' 时才执行此步骤
+        if: steps.sync_script.outputs.status == 'updated'
         run: |
           git config --global user.name 'github-actions'
           git config --global user.email 'actions@github.com'
           git add ForwardWidgets.fwd
-          git diff --cached --quiet || git commit -m '自动同步 widgets 版本信息'
+          git commit -m '自动同步 widgets 版本信息'
           git push
       - name: Telegram Notification
         env:
           TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
           TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
+          SYNC_STATUS: ${{ steps.sync_script.outputs.status }} 
+          UPDATED_WIDGETS_INFO: ${{ steps.sync_script.outputs.updated_widgets }} 
         run: |
+          MESSAGE="ForwardWidgets.fwd 同步完成。"
+
+          # 根据状态构建消息内容
+          if [ "$SYNC_STATUS" == "updated" ]; then
+            MESSAGE="ForwardWidgets.fwd 已更新并提交。"
+            # 如果有更新详情，添加到消息中
+            if [ "$UPDATED_WIDGETS_INFO" != "None" ]; then
+              UPDATED_INFO=$(echo "$UPDATED_WIDGETS_INFO" | sed 's/\\n/\n/g')
+              MESSAGE="${MESSAGE}\n\n更新详情：\n${UPDATED_INFO}"
+            fi
+          else
+            MESSAGE="ForwardWidgets.fwd 同步完成，无更新。"
+          fi
+
           curl -s -X POST "https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage" \
             -d chat_id=${TG_CHAT_ID} \
-            -d text="ForwardWidgets.fwd 已自动同步并提交。"
+            -d text="${MESSAGE}"
