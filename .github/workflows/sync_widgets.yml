@@ -20,7 +20,6 @@ jobs:
         id: sync_script # 添加 ID 以引用此步骤的输出
         run: python .github/scripts/sync_widgets.py
       - name: Commit and push changes
-        # 只有当脚本输出 status 为 'updated' 时才执行此步骤
         if: steps.sync_script.outputs.status == 'updated'
         run: |
           git config --global user.name 'github-actions'
@@ -46,7 +45,7 @@ jobs:
               MESSAGE="${MESSAGE}\n\n更新详情：\n${UPDATED_INFO}"
             fi
           else
-            MESSAGE="ForwardWidgets.fwd 同步完成，无更新。"
+            MESSAGE="ForwardWidgets.fwd 同步完成，内容已是最新。"
           fi
 
           curl -s -X POST "https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage" \
