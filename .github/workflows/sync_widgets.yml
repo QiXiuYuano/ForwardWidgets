@@ -17,9 +17,10 @@ jobs:
       - name: Install requests
         run: pip install requests
       - name: Sync widgets
-        id: sync_script # 添加 ID 以引用此步骤的输出
+        id: sync_script # Add ID to reference this step's outputs
         run: python .github/scripts/sync_widgets.py
       - name: Commit and push changes
+        # Only execute this step when script output status is 'updated'
         if: steps.sync_script.outputs.status == 'updated'
         run: |
           git config --global user.name 'github-actions'
@@ -31,17 +32,17 @@ jobs:
         env:
           TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
           TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
-          SYNC_STATUS: ${{ steps.sync_script.outputs.status }} 
-          UPDATED_WIDGETS_INFO: ${{ steps.sync_script.outputs.updated_widgets }} 
+          SYNC_STATUS: ${{ steps.sync_script.outputs.status }}
+          UPDATED_WIDGETS_INFO: ${{ steps.sync_script.outputs.updated_widgets }}
         run: |
-          MESSAGE="ForwardWidgets.fwd 同步完成。"
+          MESSAGE="" # Initialize message
 
-          # 根据状态构建消息内容
+          # Build message content based on status
           if [ "$SYNC_STATUS" == "updated" ]; then
             MESSAGE="ForwardWidgets.fwd 已更新并提交。"
-            # 如果有更新详情，添加到消息中
+            # Add update details to message if available
             if [ "$UPDATED_WIDGETS_INFO" != "None" ]; then
-              UPDATED_INFO=$(echo "$UPDATED_WIDGETS_INFO" | sed 's/\\n/\n/g')
+              UPDATED_INFO=$(echo "$UPDATED_WIDGETS_INFO" | sed 's/\\n\\n/\n\n/g' | sed 's/\\n/\n/g')
               MESSAGE="${MESSAGE}\n\n更新详情：\n${UPDATED_INFO}"
             fi
           else
