@@ -53,7 +53,7 @@ jobs:
             MESSAGE="ForwardWidgets.fwd 同步完成，内容已是最新。"
           fi
 
-          FINAL_MESSAGE="${PREFIX_MESSAGE}\n${MESSAGE}"
+          FINAL_MESSAGE="${PREFIX_MESSAGE}\n\n${MESSAGE}"
 
           # Escape double quotes and newlines in the FINAL_MESSAGE variable for JSON payload
           # Use printf %s to handle potential backslashes correctly before sed
