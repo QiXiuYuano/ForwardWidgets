@@ -1,13 +1,15 @@
 name: Sync Widgets
 on:
   schedule:
-    - cron: '0 7 * * *'
+    - cron: '0 23 * * *' # CST: Asia/Shanghai 7:00
   workflow_dispatch:
 jobs:
   sync:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      TZ: 'Asia/Shanghai'
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python
