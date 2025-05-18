@@ -49,7 +49,7 @@
    - 访问、下载、使用本仓库内容即视为已充分理解并同意上述全部条款。
 
 
-## 特别感谢
+## 特别感谢模块原作者，排名不分先后
 
 - [@huangxd-](https://github.com/huangxd-/ForwardWidgets)
 - [@pack1r](https://github.com/pack1r/ForwardWidgets)
