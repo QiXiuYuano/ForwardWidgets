@@ -39,13 +39,12 @@
    - 不代表对任何第三方产品的推荐或认可
 
 
-## 特别感谢模块原作者，排名不分先后
+## 特别感谢
 
 - [@huangxd-](https://github.com/huangxd-/ForwardWidgets)
 - [@pack1r](https://github.com/pack1r/ForwardWidgets)
 - [@两块](https://github.com/2kuai/ForwardWidgets)
 - [@阿米诺斯](https://github.com/quantumultxx/FW-Widgets)
-
 
 ## 最终解释
 
