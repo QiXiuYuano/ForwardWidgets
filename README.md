@@ -45,6 +45,7 @@
 - [@pack1r](https://github.com/pack1r/ForwardWidgets)
 - [@两块](https://github.com/2kuai/ForwardWidgets)
 - [@阿米诺斯](https://github.com/quantumultxx/FW-Widgets)
+- [@opix-maker](https://github.com/opix-maker/Forward)
 
 ## 最终解释
 
