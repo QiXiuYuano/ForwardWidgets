@@ -22,11 +22,11 @@
       "url": "https://raw.githubusercontent.com/huangxd-/ForwardWidgets/refs/heads/main/widgets/zhuijurili.js"
     },
     {
-      "id": "imdb_discovery_v1",
-      "title": "IMDb 分类资源 (v1)",
+      "id": "imdb_discovery_final_v2",
+      "title": "IMDb 分类资源 v2",
       "description": "聚合 IMDb 热门影视资源",
       "requiredVersion": "0.0.1",
-      "version": "1.0.3",
+      "version": "2.0.0",
       "author": "Autism",
       "url": "https://raw.githubusercontent.com/opix-maker/Forward/refs/heads/main/js/IMDb.js"
     },
