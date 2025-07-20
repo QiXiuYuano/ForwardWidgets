@@ -17,7 +17,7 @@
       "title": "追剧日历(今/明日播出、各项榜单、今日推荐)",
       "description": "解析追剧日历今/明日播出剧集/番剧/国漫/综艺、各项榜单、今日推荐等",
       "requiredVersion": "0.0.1",
-      "version": "1.0.3",
+      "version": "1.0.4",
       "author": "huangxd",
       "url": "https://raw.githubusercontent.com/huangxd-/ForwardWidgets/refs/heads/main/widgets/zhuijurili.js"
     },
@@ -44,7 +44,7 @@
       "title": "热门精选",
       "description": "获取最新热播剧和热门影片推荐",
       "requiredVersion": "0.0.1",
-      "version": "1.1.4",
+      "version": "1.1.7",
       "author": "两块",
       "url": "https://raw.githubusercontent.com/2kuai/ForwardWidgets/refs/heads/main/Widgets/HotPicks.js"
     },
@@ -53,9 +53,9 @@
       "title": "影视榜单",
       "description": "获取豆瓣、TMDB和IMDB的影视动画榜单",
       "requiredVersion": "0.0.1",
-      "version": "1.2.7",
+      "version": "1.2.9",
       "author": "阿米诺斯",
-      "url": "https://raw.githubusercontent.com/pack1r/ForwardWidgets/refs/heads/main/widgets/combined.js"
+      "url": "https://gist.githubusercontent.com/huangxd-/37aaa8cca9b888b2bed278e83d4432d9/raw/ForwardWidgets.js"
     },
     {
       "id": "ti.bemarkt.vod.maccms",
