@@ -18,6 +18,8 @@ jobs:
           python-version: '3.x'
       - name: Install requests
         run: pip install requests
+      - name: Install dependencies
+        run: pip install packaging
       - name: Sync widgets
         id: sync_script # Add ID to reference this step's outputs
         run: python .github/scripts/sync_widgets.py
