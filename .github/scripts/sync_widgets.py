@@ -3,6 +3,7 @@ import requests
 import copy
 import os
 import re
+import base64 
 from packaging import version as packaging_version  # pip install packaging
 
 LOCAL_FWD = 'ForwardWidgets.fwd'
