@@ -32,36 +32,34 @@ jobs:
           git add ForwardWidgets.fwd
           git commit -m '自动同步 widgets 版本信息'
           git push
+
       - name: Telegram Notification
         env:
           TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
           TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
           SYNC_STATUS: ${{ steps.sync_script.outputs.status }}
-          UPDATED_WIDGETS_INFO: ${{ steps.sync_script.outputs.updated_widgets }}
+          UPDATED_WIDGETS_B64: ${{ steps.sync_script.outputs.updated_widgets_b64 }}
         run: |
           CURRENT_DATE=$(date +'%Y-%m-%d %H:%M')
           WORKFLOW_NAME="Sync Widgets Workflow"
           PREFIX_MESSAGE="${CURRENT_DATE} ${WORKFLOW_NAME} 自动执行。"
-
-          MESSAGE="" # Initialize message
-
+      
+          MESSAGE=""
+      
           if [ "$SYNC_STATUS" == "updated" ]; then
             MESSAGE="ForwardWidgets.fwd 已更新并提交。"
-            if [ "$UPDATED_WIDGETS_INFO" != "None" ]; then
-              UPDATED_INFO=$(echo "$UPDATED_WIDGETS_INFO" | sed 's/\\n\\n/\n\n/g' | sed 's/\\n/\n/g')
+            if [ "$UPDATED_WIDGETS_B64" != "None" ]; then
+              UPDATED_INFO=$(echo "$UPDATED_WIDGETS_B64" | base64 -d)
               MESSAGE="${MESSAGE}\n\n更新详情：\n${UPDATED_INFO}"
             fi
           else
             MESSAGE="ForwardWidgets.fwd 同步完成，内容已是最新。"
           fi
-
+      
           FINAL_MESSAGE="${PREFIX_MESSAGE}\n\n${MESSAGE}"
-
-          # Escape double quotes and newlines in the FINAL_MESSAGE variable for JSON payload
-          # Use printf %s to handle potential backslashes correctly before sed
+      
           ESCAPED_MESSAGE=$(printf "%s" "$FINAL_MESSAGE" | sed 's/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g')
-
-          # Send the JSON payload to Telegram API
+      
           curl -s -X POST "https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage" \
             -H "Content-Type: application/json" \
             -d "{\"chat_id\": \"${TG_CHAT_ID}\", \"text\": \"${ESCAPED_MESSAGE}\"}"
