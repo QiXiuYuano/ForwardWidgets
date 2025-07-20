@@ -87,10 +87,12 @@ if local != original_local:
         f.write('status=updated\n')
         if detailed_updates:
             detailed_updates_str = "\n\n".join(detailed_updates)
-            f.write(f'updated_widgets={detailed_updates_str}\n')
+            # base64 编码
+            encoded = base64.b64encode(detailed_updates_str.encode('utf-8')).decode('utf-8')
+            f.write(f'updated_widgets_b64={encoded}\n')
         else:
-            f.write('updated_widgets=None\n')
+            f.write('updated_widgets_b64=None\n')
 else:
     with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
         f.write('status=no_updates\n')
-        f.write('updated_widgets=None\n')
+        f.write('updated_widgets_b64=None\n')
