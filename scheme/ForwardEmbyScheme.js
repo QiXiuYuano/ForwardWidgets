@@ -120,9 +120,10 @@ function generateForwardSchemeUrl(info) {
 }
 
 
-
 async function run(rawText) {
   const info = parseEmbyInfo(rawText);
   const schemeUrl = generateForwardSchemeUrl(info);
   return schemeUrl;
 }
+
+module.exports = { parseEmbyInfo, generateForwardSchemeUrl, run };
