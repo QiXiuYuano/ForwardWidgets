@@ -1,7 +1,4 @@
-// forward_emby_for_shortcuts.js
-
-// 以下两个函数 parseEmbyInfo 和 generateForwardSchemeUrl
-// 无需修改，因为它们是纯 JavaScript 函数，不依赖于 Scriptable 的 API。
+// Forward Emby Scheme 自动解析脚本 for Scriptable（宽松URL过滤版）
 
 function parseEmbyInfo(text) {
   const info = { username: '', password: '', lines: [] };
@@ -67,11 +64,14 @@ function parseEmbyInfo(text) {
     }
   }
 
+  // 宽松过滤URL，避免过滤掉合理URL
   info.lines = info.lines.filter(line => {
     if (!line.url) return false;
     let urlStr = line.url.trim();
+    // 简单正则校验格式 http(s)://host(:port)?，不严格用new URL
     const simpleUrlPattern = /^https?:\/\/[\w\-.]+(:\d+)?\/?$/i;
     if (!simpleUrlPattern.test(urlStr)) {
+      console.log(`格式不符，跳过: ${line.url}`);
       return false;
     }
     return true;
@@ -86,16 +86,22 @@ function generateForwardSchemeUrl(info) {
   if (!info.lines || info.lines.length === 0) return null;
 
   let rawUrl = info.lines[0].url.trim();
+
+  // 用正则解析 scheme://host:port
   const urlMatch = rawUrl.match(/^(https?):\/\/([^\/:]+)(?::(\d+))?/i);
   if (!urlMatch) {
+    console.error(`主线路URL格式错误: ${rawUrl}`);
     return null;
   }
   const scheme = urlMatch[1];
   const host = urlMatch[2];
   const port = urlMatch[3] || (scheme === 'https' ? '443' : '80');
+
+  // 下面生成scheme URL逻辑不变
   const genericTitles = ['线路', '地址', '服务器'];
   const firstLineTitle = info.lines[0].title || host;
   const title = genericTitles.includes(firstLineTitle) ? '' : firstLineTitle;
+
   let url = `forward://import?type=emby&scheme=${scheme}&host=${host}&port=${port}&username=${info.username}&password=${info.password}`;
   if (title) {
     url += `&title=${title}`;
@@ -109,34 +115,14 @@ function generateForwardSchemeUrl(info) {
     }
     url += `&line${lineIndex}=${normalizedUrl}&line${lineIndex}title=${lineTitle}`;
   });
+
   return url;
 }
 
-// =================================================================
-// 以下是为“在 URL 上运行 JavaScript”做的修改
-// =================================================================
 
-// 核心逻辑，不再是 main() 函数
-try {
-    // 快捷指令的输入被自动赋值给全局变量 _input
-    let rawText = _input;
-    
-    // 检查是否有输入
-    if (rawText === null || rawText === undefined || rawText.length === 0) {
-        // 如果没有输入，通过 completion() 返回错误信息
-        completion("错误: 快捷指令未提供文本输入");
-    } else {
-        const info = parseEmbyInfo(rawText);
-        const schemeUrl = generateForwardSchemeUrl(info);
-    
-        if (!schemeUrl) {
-            completion("错误: 未生成有效的 Forward Scheme URL");
-        } else {
-            // 成功时，通过 completion() 返回生成的 URL
-            completion(schemeUrl);
-        }
-    }
-} catch (e) {
-    // 捕获到任何错误，通过 completion() 返回错误信息
-    completion("错误: " + e.message);
+
+async function run(rawText) {
+  const info = parseEmbyInfo(rawText);
+  const schemeUrl = generateForwardSchemeUrl(info);
+  return schemeUrl;
 }
