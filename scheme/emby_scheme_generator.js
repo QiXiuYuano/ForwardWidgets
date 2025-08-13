@@ -196,8 +196,8 @@ function generateSenPlayerSchemeUrl(embyInfo) {
 async function run(configText) {
   const embyInfo = parseEmbyInfo(configText);
   return {
-    forward: generateForwardSchemeUrl(embyInfo),
-    senplayer: generateSenPlayerSchemeUrl(embyInfo)
+    Forward: generateForwardSchemeUrl(embyInfo),
+    SenPlayer: generateSenPlayerSchemeUrl(embyInfo)
   };
 }
 
