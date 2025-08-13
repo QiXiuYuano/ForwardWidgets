@@ -119,6 +119,71 @@ function generateForwardSchemeUrl(info) {
   return url;
 }
 
+function generateSenPlayerSchemeUrl(info) {
+  if (!info.lines || info.lines.length === 0) return null;
+
+  let rawUrl = info.lines[0].url.trim();
+  console.log("解析主线路URL", rawUrl);
+
+  // 用正则解析 scheme://host:port(/path)
+  const urlMatch = rawUrl.match(/^(https?):\/\/([^\/:]+)(?::(\d+))?(\/.*)?$/i);
+  if (!urlMatch) {
+    console.error(`主线路URL格式错误: ${rawUrl}`);
+    return null;
+  }
+  const scheme = urlMatch[1];
+  const host = urlMatch[2];
+  const port = urlMatch[3] || (scheme === 'https' ? '443' : '80');
+  const path = urlMatch[4] || '';
+
+  // 构建主地址，包含端口和路径
+  let address = `${scheme}://${host}`;
+  if (port) {
+    address += `:${port}`;
+  }
+  address += path;
+
+  // 生成senplayer scheme URL，name和note默认为空
+  let url = `senplayer://importserver?type=emby&address=${address}&username=${info.username}&password=${info.password}`;
+
+  // 添加备用线路（从第二条线路开始）
+  info.lines.slice(1).forEach((line, index) => {
+    const lineIndex = index + 1; // 从address1开始
+    const lineRawUrl = line.url.trim();
+
+    // 解析备用线路url
+    const lineUrlMatch = lineRawUrl.match(/^(https?):\/\/([^\/:]+)(?::(\d+))?(\/.*)?$/i);
+    if (!lineUrlMatch) {
+      console.warn(`备用线路URL格式错误，跳过: ${lineRawUrl}`);
+      return; // 跳过格式错误的备用线路
+    }
+    const lineScheme = lineUrlMatch[1];
+    const lineHost = lineUrlMatch[2];
+    const linePort = lineUrlMatch[3] || (lineScheme === 'https' ? '443' : '80');
+    const linePath = lineUrlMatch[4] || '';
+
+    // 构建备用线路地址
+    let lineAddress = `${lineScheme}://${lineHost}`;
+    if (linePort) {
+      lineAddress += `:${linePort}`;
+    }
+    lineAddress += linePath;
+
+    // 线路标题如果是“线路”，替换成“备用线路${index+1}”
+    let lineTitle = line.title;
+    if (lineTitle === '线路') {
+      lineTitle = `备用线路${index + 1}`;
+    }
+
+    // 拼接备用线路参数，不编码
+    url += `&address${lineIndex}=${lineAddress}&address${lineIndex}name=${lineTitle}`;
+  });
+
+  return url;
+}
+
+
+
 
 async function run(rawText) {
   const info = parseEmbyInfo(rawText);
