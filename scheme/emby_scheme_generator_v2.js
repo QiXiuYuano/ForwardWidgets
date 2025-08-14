@@ -270,31 +270,68 @@ function generateForwardSchemeUrl(embyInfo) {
 }
 
 function generateSenPlayerSchemeUrl(embyInfo) {
-    const processedLines = processEmbyLines(embyInfo.lines);
-    if (!processedLines) return null;
+  if (!embyInfo.lines || embyInfo.lines.length === 0) return null;
 
-    const { main, backup } = processedLines;
+  const rawUrl = embyInfo.lines[0].url.trim();
+  console.log("解析主线路URL", rawUrl);
 
-    let address = `${main.scheme}://${main.host}`;
-    if (main.port) {
-        address += `:${main.port}`;
+  // 正则解析 scheme://host:port(/path)
+  const urlMatch = rawUrl.match(/^(https?):\/\/([^\/:]+)(?::(\d+))?(\/.*)?$/i);
+  if (!urlMatch) {
+    console.error(`主线路URL格式错误: ${rawUrl}`);
+    return null;
+  }
+  const scheme = urlMatch[1];
+  const host = urlMatch[2];
+  const port = urlMatch[3] || (scheme === 'https' ? '443' : '80');
+  const path = urlMatch[4] || '';
+
+  // 构建主地址，包含端口和路径
+  let address = `${scheme}://${host}`;
+  if (port) {
+    address += `:${port}`;
+  }
+  address += path;
+
+  // 生成senplayer scheme URL，name和note默认为空
+  let url = `senplayer://importserver?type=emby&address=${address}&username=${embyInfo.username}&password=${embyInfo.password}`;
+
+  // 添加备用线路（从第二条线路开始）
+  embyInfo.lines.slice(1).forEach((line, index) => {
+    const lineIndex = index + 1; // 从address1开始
+    const lineRawUrl = line.url.trim();
+
+    // 解析备用线路url
+    const lineUrlMatch = lineRawUrl.match(/^(https?):\/\/([^\/:]+)(?::(\d+))?(\/.*)?$/i);
+    if (!lineUrlMatch) {
+      console.warn(`备用线路URL格式错误，跳过: ${lineRawUrl}`);
+      return; // 跳过格式错误的备用线路
     }
-    address += main.path;
+    const lineScheme = lineUrlMatch[1];
+    const lineHost = lineUrlMatch[2];
+    const linePort = lineUrlMatch[3] || (lineScheme === 'https' ? '443' : '80');
+    const linePath = lineUrlMatch[4] || '';
 
-    let url = `senplayer://importserver?type=emby&address=${address}&username=${embyInfo.username}&password=${embyInfo.password}`;
+    // 构建备用线路地址
+    let lineAddress = `${lineScheme}://${lineHost}`;
+    if (linePort) {
+      lineAddress += `:${linePort}`;
+    }
+    lineAddress += linePath;
 
-    backup.forEach(line => {
-        let lineAddress = `${line.scheme}://${line.host}`;
-        if (line.port) {
-            lineAddress += `:${line.port}`;
-        }
-        lineAddress += line.path;
+    // 线路标题如果是“线路”，替换成“备用线路${index+1}”
+    let lineTitle = line.title;
+    if (lineTitle === '线路') {
+      lineTitle = `备用线路${lineIndex}`;
+    }
 
-        url += `&address${line.index}=${lineAddress}&address${line.index}name=${line.title}`;
-    });
+    // 拼接备用线路参数，不编码
+    url += `&address${lineIndex}=${lineAddress}&address${lineIndex}name=${lineTitle}`;
+  });
 
-    return url;
+  return url;
 }
+
 
 
 async function run(configText) {
