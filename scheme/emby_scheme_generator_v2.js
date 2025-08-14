@@ -140,84 +140,98 @@ function parseEmbyInfo(configText) {
 }
 
 
-const genericConfig = `
+function processEmbyLines(lines) {
+  if (!lines || lines.length === 0) return null;
 
-用户名：user张三-abc_123🚀
-密码：mypassword456
+  const mainLine = lines[0];
+  const mainUrl = new URL(mainLine.url.trim());
+  const mainInfo = {
+    scheme: mainUrl.protocol.replace(':', ''),
+    host: mainUrl.hostname,
+    port: mainUrl.port || (mainUrl.protocol === 'https:' ? '443' : '80'),
+    path: mainUrl.pathname + mainUrl.search + mainUrl.hash,
+    title: '主线路',
+    url: mainLine.url
+  };
 
-# 带标签的可能情况
-当前线路：https://emby-1.example.com:443
-主线路：https://emby-2.example.com
-端口：8096
+  let genericLineCounter = 1;
+  const backupLines = lines.slice(1).map((line, index) => {
+    const lineUrl = new URL(line.url.trim());
+    let lineTitle = line.title;
+    
+    if (lineTitle === '线路') {
+      lineTitle = `备用线路${genericLineCounter}`;
+      genericLineCounter++;
+    }
+    
+    return {
+      index: index + 1,
+      scheme: lineUrl.protocol.replace(':', ''),
+      host: lineUrl.hostname,
+      port: lineUrl.port || (lineUrl.protocol === 'https:' ? '443' : '80'),
+      path: lineUrl.pathname + lineUrl.search + lineUrl.hash,
+      title: lineTitle,
+      url: line.url,
+      originalTitle: line.title
+    };
+  });
 
-服务器：https://emby-3.example.com/
-地址|https://emby-4.example.com:9000/
+  return {
+    main: mainInfo,
+    backup: backupLines
+  };
+}
 
-IP线路: https://192.168.1.10:8920
-IP线路2: https://192.168.1.11:8443
-端口:8443
-域名线路|https://emby-5.example.com:443/
+function generateForwardSchemeUrl(embyInfo) {
+  const processedLines = processEmbyLines(embyInfo.lines);
+  if (!processedLines) return null;
 
-国内直连线路：https://cn-1.example.com
-海外线路：https://overseas-1.example.com:8096
-CDN加速线路：https://cdn-hk.example.com:443
-联通线路|https://unicom-1.example.com
-端口:443
+  const { main, backup } = processedLines;
+  
+  let url = `forward://import?type=emby&scheme=${main.scheme}&host=${main.host}&port=${main.port}&title=${main.title}&username=${embyInfo.username}&password=${embyInfo.password}`;
 
-# 主机名+端口的组合格式
-服务器：emby-6.example.com
-端口：8096
-主机名：emby-7.example.com
-https 端口：443
+  backup.forEach(line => {
+    const normalizedUrl = line.url.endsWith('/') ? line.url.slice(0, -1) : line.url;
+    url += `&line${line.index}=${normalizedUrl}&line${line.index}title=${line.title}`;
+  });
 
-IP地址：192.168.1.20
-http端口: 8920
-直连地址：direct-1.example.com:9000
-移动线路：mobile-1.example.com:8088（备注）
-电信线路：telecom-1.example.com
-端口|9001
+  return url;
+}
 
-cf线路：cf-1.example.com
+function generateSenPlayerSchemeUrl(embyInfo) {
+  const processedLines = processEmbyLines(embyInfo.lines);
+  if (!processedLines) return null;
 
-# standardURL no label
-https://standalone-1.example.com
-https 端口：443
-https://standalone-2.example.com:8096/(备注)
-https://192.168.1.30:8443
-standalone-3.example.com:9999
-standalone-4.example.com
-端口：443（备注）
-192.168.1.40:80
-192.168.1.50
-端口：8088
+  const { main, backup } = processedLines;
 
-推荐地址：https://wiki.emby.com
-续费地址：https://faka.example.com
-说明文档：https://notion.example.com/help
-Telegram：https://t.me/embychannel
-帮助页面：https://help.emby.com
+  let address = `${main.scheme}://${main.host}`;
+  if (main.port) {
+    address += `:${main.port}`;
+  }
+  address += main.path;
 
-`;
+  let url = `senplayer://importserver?type=emby&address=${address}&username=${embyInfo.username}&password=${embyInfo.password}`;
+
+  backup.forEach(line => {
+    let lineAddress = `${line.scheme}://${line.host}`;
+    if (line.port) {
+      lineAddress += `:${line.port}`;
+    }
+    lineAddress += line.path;
+    
+    url += `&address${line.index}=${lineAddress}&address${line.index}name=${line.title}`;
+  });
+
+  return url;
+}
 
 
-const debugConfig = `
+async function run(configText) {
+  const embyInfo = parseEmbyInfo(configText);
+  return {
+    Forward: generateForwardSchemeUrl(embyInfo),
+    SenPlayer: generateSenPlayerSchemeUrl(embyInfo)
+  };
+}
 
-# standardURL no label
-https://standaline1.emby.com
-https 端口：443
-https://standaline2.emby.com:8096/(备注)
-https://192.168.1.101:8443
-standaline3.emby.com:9999
-standaline4.example.com
-端口：443（备注）
-192.168.1.201:80
-192.168.1.303
-端口：8088
-
-`;
-
-const genericInfo = parseEmbyInfo(genericConfig);
-console.log(genericInfo)
-
-// const debugInfo = parseEmbyInfo(debugConfig);
-// console.log(debugInfo)
+module.exports = { parseEmbyInfo, generateForwardSchemeUrl, generateSenPlayerSchemeUrl, run };
