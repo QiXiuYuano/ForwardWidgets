@@ -1,33 +1,49 @@
-// URL 解析兼容函数
 function parseUrl(urlString) {
-    // 如果环境支持 URL 构造函数，则直接使用
-    if (typeof URL !== 'undefined') {
-        try {
-            return new URL(urlString);
-        } catch (e) {
-            // 如果解析失败，降级到手动解析
+    try {
+        let urlObj = null;
+        
+        if (typeof URL !== 'undefined') {
+            try {
+                urlObj = new URL(urlString);
+            } catch (e) {
+                // 解析失败，后续会使用正则解析
+            }
         }
-    }
 
-    // 手动解析 URL
-    const urlPattern = /^(https?:)\/\/([^\/:]+)(?::(\d+))?(\/[^?#]*)?(\?[^#]*)?(#.*)?$/;
-    const match = urlString.match(urlPattern);
+        if (urlObj) {
+            return {
+                protocol: String(urlObj.protocol || ''),
+                hostname: String(urlObj.hostname || ''),
+                port: String(urlObj.port || ''),
+                pathname: String(urlObj.pathname || '/'),
+                search: String(urlObj.search || ''),
+                hash: String(urlObj.hash || ''),
+                toString: () => urlString
+            };
+        }
+        
+        // 手动解析 URL（用于 Scriptable 或 URL 解析失败的情况）
+        const urlPattern = /^(https?:)\/\/([^\/:]+)(?::(\d+))?(\/[^?#]*)?(\?[^#]*)?(#.*)?$/;
+        const match = urlString.match(urlPattern);
 
-    if (!match) {
+        if (!match) {
+            return null;
+        }
+
+        const [, protocol, hostname, port, pathname, search, hash] = match;
+
+        return {
+            protocol: String(protocol || ''),
+            hostname: String(hostname || ''),
+            port: String(port || ''),
+            pathname: String(pathname || '/'),
+            search: String(search || ''),
+            hash: String(hash || ''),
+            toString: () => urlString
+        };
+    } catch (e) {
         return null;
     }
-
-    const [, protocol, hostname, port, pathname, search, hash] = match;
-
-    return {
-        protocol: String(protocol || ''),
-        hostname: String(hostname || ''),
-        port: String(port || ''),
-        pathname: String(pathname || '/'),
-        search: String(search || ''),
-        hash: String(hash || ''),
-        toString: () => urlString
-    };
 }
 
 
