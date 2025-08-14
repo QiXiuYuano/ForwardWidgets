@@ -20,12 +20,12 @@ function parseUrl(urlString) {
     const [, protocol, hostname, port, pathname, search, hash] = match;
 
     return {
-        protocol: protocol || '',
-        hostname: hostname || '',
-        port: port || '',
-        pathname: pathname || '/',
-        search: search || '',
-        hash: hash || '',
+        protocol: String(protocol || ''),
+        hostname: String(hostname || ''),
+        port: String(port || ''),
+        pathname: String(pathname || '/'),
+        search: String(search || ''),
+        hash: String(hash || ''),
         toString: () => urlString
     };
 }
