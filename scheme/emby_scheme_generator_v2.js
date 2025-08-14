@@ -235,19 +235,38 @@ function processEmbyLines(lines) {
 }
 
 function generateForwardSchemeUrl(embyInfo) {
-    const processedLines = processEmbyLines(embyInfo.lines);
-    if (!processedLines) return null;
+  if (!embyInfo.lines || embyInfo.lines.length === 0) return null;
 
-    const { main, backup } = processedLines;
+  const rawUrl = embyInfo.lines[0].url.trim();
 
-    let url = `forward://import?type=emby&scheme=${main.scheme}&host=${main.host}&port=${main.port}&title=${main.title}&username=${embyInfo.username}&password=${embyInfo.password}`;
+  // 正则解析 scheme://host:port
+  const urlMatch = rawUrl.match(/^(https?):\/\/([^\/:]+)(?::(\d+))?/i);
+  if (!urlMatch) {
+    console.error(`主线路URL格式错误: ${rawUrl}`);
+    return null;
+  }
+  const scheme = urlMatch[1];
+  const host = urlMatch[2];
+  const port = urlMatch[3] || (scheme === 'https' ? '443' : '80');
 
-    backup.forEach(line => {
-        const normalizedUrl = line.url.endsWith('/') ? line.url.slice(0, -1) : line.url;
-        url += `&line${line.index}=${normalizedUrl}&line${line.index}title=${line.title}`;
-    });
+  const title = '主线路';
 
-    return url;
+  let url = `forward://import?type=emby&scheme=${scheme}&host=${host}&port=${port}&username=${embyInfo.username}&password=${embyInfo.password}`;
+  if (title) {
+    url += `&title=${title}`;
+  }
+
+  embyInfo.lines.slice(1).forEach((line, index) => {
+    const lineIndex = index + 1;
+    const normalizedUrl = line.url.endsWith('/') ? line.url.slice(0, -1) : line.url;
+    let lineTitle = line.title;
+    if (lineTitle === '线路') {
+      lineTitle = `备用线路${lineIndex}`;
+    }
+    url += `&line${lineIndex}=${normalizedUrl}&line${lineIndex}title=${lineTitle}`;
+  });
+
+  return url;
 }
 
 function generateSenPlayerSchemeUrl(embyInfo) {
