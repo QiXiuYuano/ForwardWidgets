@@ -235,104 +235,47 @@ function processEmbyLines(lines) {
 }
 
 function generateForwardSchemeUrl(embyInfo) {
-  if (!embyInfo.lines || embyInfo.lines.length === 0) return null;
+    const processedLines = processEmbyLines(embyInfo.lines);
+    if (!processedLines) return null;
 
-  const rawUrl = embyInfo.lines[0].url.trim();
+    const { main, backup } = processedLines;
 
-  // 正则解析 scheme://host:port
-  const urlMatch = rawUrl.match(/^(https?):\/\/([^\/:]+)(?::(\d+))?/i);
-  if (!urlMatch) {
-    console.error(`主线路URL格式错误: ${rawUrl}`);
-    return null;
-  }
-  const scheme = urlMatch[1];
-  const host = urlMatch[2];
-  const port = urlMatch[3] || (scheme === 'https' ? '443' : '80');
+    let url = `forward://import?type=emby&scheme=${main.scheme}&host=${main.host}&port=${main.port}&title=${main.title}&username=${embyInfo.username}&password=${embyInfo.password}`;
 
-  const title = '主线路';
+    backup.forEach(line => {
+        const normalizedUrl = line.url.endsWith('/') ? line.url.slice(0, -1) : line.url;
+        url += `&line${line.index}=${normalizedUrl}&line${line.index}title=${line.title}`;
+    });
 
-  let url = `forward://import?type=emby&scheme=${scheme}&host=${host}&port=${port}&username=${embyInfo.username}&password=${embyInfo.password}`;
-  if (title) {
-    url += `&title=${title}`;
-  }
-
-  embyInfo.lines.slice(1).forEach((line, index) => {
-    const lineIndex = index + 1;
-    const normalizedUrl = line.url.endsWith('/') ? line.url.slice(0, -1) : line.url;
-    let lineTitle = line.title;
-    if (lineTitle === '线路') {
-      lineTitle = `备用线路${lineIndex}`;
-    }
-    url += `&line${lineIndex}=${normalizedUrl}&line${lineIndex}title=${lineTitle}`;
-  });
-
-  return url;
+    return url;
 }
 
 function generateSenPlayerSchemeUrl(embyInfo) {
-  if (!embyInfo.lines || embyInfo.lines.length === 0) return null;
+    const processedLines = processEmbyLines(embyInfo.lines);
+    if (!processedLines) return null;
 
-  const rawUrl = embyInfo.lines[0].url.trim();
-  console.log("解析主线路URL", rawUrl);
+    const { main, backup } = processedLines;
 
-  // 正则解析 scheme://host:port(/path)
-  const urlMatch = rawUrl.match(/^(https?):\/\/([^\/:]+)(?::(\d+))?(\/.*)?$/i);
-  if (!urlMatch) {
-    console.error(`主线路URL格式错误: ${rawUrl}`);
-    return null;
-  }
-  const scheme = urlMatch[1];
-  const host = urlMatch[2];
-  const port = urlMatch[3] || (scheme === 'https' ? '443' : '80');
-  const path = urlMatch[4] || '';
-
-  // 构建主地址，包含端口和路径
-  let address = `${scheme}://${host}`;
-  if (port) {
-    address += `:${port}`;
-  }
-  address += path;
-
-  // 生成senplayer scheme URL，name和note默认为空
-  let url = `senplayer://importserver?type=emby&address=${address}&username=${embyInfo.username}&password=${embyInfo.password}`;
-
-  // 添加备用线路（从第二条线路开始）
-  embyInfo.lines.slice(1).forEach((line, index) => {
-    const lineIndex = index + 1; // 从address1开始
-    const lineRawUrl = line.url.trim();
-
-    // 解析备用线路url
-    const lineUrlMatch = lineRawUrl.match(/^(https?):\/\/([^\/:]+)(?::(\d+))?(\/.*)?$/i);
-    if (!lineUrlMatch) {
-      console.warn(`备用线路URL格式错误，跳过: ${lineRawUrl}`);
-      return; // 跳过格式错误的备用线路
+    let address = `${main.scheme}://${main.host}`;
+    if (main.port) {
+        address += `:${main.port}`;
     }
-    const lineScheme = lineUrlMatch[1];
-    const lineHost = lineUrlMatch[2];
-    const linePort = lineUrlMatch[3] || (lineScheme === 'https' ? '443' : '80');
-    const linePath = lineUrlMatch[4] || '';
+    address += main.path;
 
-    // 构建备用线路地址
-    let lineAddress = `${lineScheme}://${lineHost}`;
-    if (linePort) {
-      lineAddress += `:${linePort}`;
-    }
-    lineAddress += linePath;
+    let url = `senplayer://importserver?type=emby&address=${address}&username=${embyInfo.username}&password=${embyInfo.password}`;
 
-    // 线路标题如果是“线路”，替换成“备用线路${index+1}”
-    let lineTitle = line.title;
-    if (lineTitle === '线路') {
-      lineTitle = `备用线路${lineIndex}`;
-    }
+    backup.forEach(line => {
+        let lineAddress = `${line.scheme}://${line.host}`;
+        if (line.port) {
+            lineAddress += `:${line.port}`;
+        }
+        lineAddress += line.path;
 
-    // 拼接备用线路参数，不编码
-    url += `&address${lineIndex}=${lineAddress}&address${lineIndex}name=${lineTitle}`;
-  });
+        url += `&address${line.index}=${lineAddress}&address${line.index}name=${line.title}`;
+    });
 
-  return url;
+    return url;
 }
-
-
 
 async function run(configText) {
     const embyInfo = parseEmbyInfo(configText);
