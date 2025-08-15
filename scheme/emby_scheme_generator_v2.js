@@ -1,47 +1,47 @@
 function parseUrl(urlString) {
+    if (!urlString || typeof urlString !== 'string') {
+        return null;
+    }
+
     try {
-        let urlObj = null;
-        
         if (typeof URL !== 'undefined') {
             try {
-                urlObj = new URL(urlString);
+                const urlObj = new URL(urlString);
+                return {
+                    protocol: urlObj.protocol || '',
+                    hostname: urlObj.hostname || '',
+                    port: urlObj.port || '',
+                    pathname: urlObj.pathname || '/',
+                    search: urlObj.search || '',
+                    hash: urlObj.hash || '',
+                    toString: () => urlString
+                };
             } catch (e) {
-                // 解析失败，后续会使用正则解析
+                // 继续使用手动解析
             }
-        }
-
-        if (urlObj) {
-            return {
-                protocol: String(urlObj.protocol || ''),
-                hostname: String(urlObj.hostname || ''),
-                port: String(urlObj.port || ''),
-                pathname: String(urlObj.pathname || '/'),
-                search: String(urlObj.search || ''),
-                hash: String(urlObj.hash || ''),
-                toString: () => urlString
-            };
         }
         
         // 手动解析 URL（用于 Scriptable 或 URL 解析失败的情况）
         const urlPattern = /^(https?:)\/\/([^\/:]+)(?::(\d+))?(\/[^?#]*)?(\?[^#]*)?(#.*)?$/;
         const match = urlString.match(urlPattern);
-
+        
         if (!match) {
             return null;
         }
-
-        const [, protocol, hostname, port, pathname, search, hash] = match;
-
+        
+        const [, protocol = '', hostname = '', port = '', pathname = '/', search = '', hash = ''] = match;
+        
         return {
-            protocol: String(protocol || ''),
-            hostname: String(hostname || ''),
-            port: String(port || ''),
-            pathname: String(pathname || '/'),
-            search: String(search || ''),
-            hash: String(hash || ''),
+            protocol,
+            hostname,
+            port,
+            pathname,
+            search,
+            hash,
             toString: () => urlString
         };
     } catch (e) {
+        // console.error('URL parsing error:', e);
         return null;
     }
 }
