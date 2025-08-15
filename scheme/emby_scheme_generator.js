@@ -13,192 +13,299 @@
  * 转载请保留来源
  */
 
+function parseUrl(urlString) {
+    if (!urlString || typeof urlString !== 'string') {
+        return null;
+    }
+
+    try {
+        if (typeof URL !== 'undefined') {
+            try {
+                const urlObj = new URL(urlString);
+                return {
+                    protocol: urlObj.protocol || '',
+                    hostname: urlObj.hostname || '',
+                    port: urlObj.port || '',
+                    pathname: urlObj.pathname || '/',
+                    search: urlObj.search || '',
+                    hash: urlObj.hash || '',
+                    toString: () => urlString
+                };
+            } catch (e) {
+                // 继续使用手动解析
+            }
+        }
+        
+        // 手动解析 URL（用于 Scriptable 或 URL 解析失败的情况）
+        const urlPattern = /^(https?:)\/\/([^\/:]+)(?::(\d+))?(\/[^?#]*)?(\?[^#]*)?(#.*)?$/;
+        const match = urlString.match(urlPattern);
+        
+        if (!match) {
+            return null;
+        }
+        
+        const [, protocol = '', hostname = '', port = '', pathname = '/', search = '', hash = ''] = match;
+        
+        return {
+            protocol,
+            hostname,
+            port,
+            pathname,
+            search,
+            hash,
+            toString: () => urlString
+        };
+    } catch (e) {
+        // console.error('URL parsing error:', e);
+        return null;
+    }
+}
+
 function parseEmbyInfo(configText) {
-  const embyInfo = { username: '', password: '', lines: [] };
-  const textLines = configText.split('\n');
-  let lastHost = null;
+    const embyInfo = { username: '', password: '', lines: [] };
+    const textLines = configText.split('\n');
+    let lastHost = null;
 
-  const regexPatterns = {
-    username: /(?:用户名|用户名称)\s*[|：:]\s*([a-zA-Z0-9\-_]+)/,
-    password: /(?:密码|用户密码)\s*[|：:]\s*(\S+)/,
-    genericUrl: /((?:当前线路|服务器|地址|主机名|ip[\w\d\u4e00-\u9fa5]*|域名[\w\d\u4e00-\u9fa5]*|直连[\w\d\u4e00-\u9fa5]*|[\w\d\u4e00-\u9fa5]*线路)\s*)[|：:]\s*(https?:\/\/[a-zA-Z0-9.\-:]+)/,
-    hostLineUrl: /((?:当前线路|主线路|服务器|地址|主机名|ip[\w\d\u4e00-\u9fa5]*|域名[\w\d\u4e00-\u9fa5]*|直连[\w\d\u4e00-\u9fa5]*|[\w\d\u4e00-\u9fa5]*线路)\s*)[|：:]\s*(\S+)/,
-    standaloneUrl: /^(https?:\/\/[a-zA-Z0-9.\-:]+\/?)$/,
-    port: /(?:https? 端口|端口)\s*[|：:]\s*(\d{2,5})/,
-  };
+    const regexPatterns = {
+        username: /(?:用户名|用户名称)\s*[|：:]\s*(\S.+)/u,
+        password: /(?:密码|用户密码)\s*[|：:]\s*(\S+)/,
+        genericUrl: /((?:[\w\d\u4e00-\u9fa5]*\s*线路\s*\d*|服务器|地址|主机名|备用|ip|cf)\s*)[|：:]\s*((https?:\/\/)?[a-zA-Z0-9.\-]+\.[a-zA-Z0-9.\-:]*)/i,
+        standaloneUrl: /^((https?:\/\/)?[a-zA-Z0-9.\-]+\.[a-zA-Z0-9.\-:]*)/,
+        port: /(?:https?\s*端口|端口)\s*[|：:]\s*(\d{2,5})/,
+    };
 
-  for (const line of textLines) {
-    const trimmedLine = line.trim();
-    if (!trimmedLine) continue;
+    function processUrlMatch(lineInfo) {
+        const { title, url: fullUrl } = lineInfo;
+        const parsedUrl = parseUrl(fullUrl);
+        const hasPort = fullUrl.startsWith('http') 
+            ? !!(parsedUrl && parsedUrl.port) 
+            : /:\d+$/.test(fullUrl);
 
-    let match = trimmedLine.match(regexPatterns.username);
-    if (match && !embyInfo.username) embyInfo.username = match[1];
-
-    match = trimmedLine.match(regexPatterns.password);
-    if (match && !embyInfo.password) embyInfo.password = match[1];
-
-    match = trimmedLine.match(regexPatterns.genericUrl);
-    if (match) {
-      const label = match[1].trim().replace('当前线路', '线路');
-      embyInfo.lines.push({ title: label, url: match[2] });
-      lastHost = null;
-      continue;
+        if (hasPort) {
+            embyInfo.lines.push({ title, url: fullUrl });
+            lastHost = null;
+        } else {
+            lastHost = { title, host: fullUrl };
+        }
     }
 
-    match = trimmedLine.match(regexPatterns.hostLineUrl);
-    if (match) {
-      const title = match[1].replace('当前线路', '线路');
-      const host = match[2];
-      if (!host.startsWith('http')) {
-        lastHost = { title, host };
-      } else {
-        embyInfo.lines.push({ title, url: host });
-        lastHost = null;
-      }
-      continue;
+    function addLineFromLastHost(port = '') {
+        if (lastHost) {
+            const url = port ? `${lastHost.host}:${port}` : lastHost.host;
+            embyInfo.lines.push({ title: lastHost.title, url });
+            lastHost = null;
+        }
     }
 
-    match = trimmedLine.match(regexPatterns.port);
-    if (match && lastHost) {
-      const port = match[1];
-      const scheme = (port === '443') ? 'https' : 'http';
-      const url = `${scheme}://${lastHost.host}:${port}`;
-      embyInfo.lines.push({ title: lastHost.title, url });
-      lastHost = null;
-      continue;
+    for (const line of textLines) {
+        const trimmedLine = line.trim();
+        if (!trimmedLine) continue;
+
+        const usernameMatch = trimmedLine.match(regexPatterns.username);
+        const passwordMatch = trimmedLine.match(regexPatterns.password);
+        const genericUrlMatch = trimmedLine.match(regexPatterns.genericUrl);
+        const standaloneUrlMatch = trimmedLine.match(regexPatterns.standaloneUrl);
+        const portMatch = trimmedLine.match(regexPatterns.port);
+
+        const isLabelLine = !!(genericUrlMatch || usernameMatch || passwordMatch);
+
+        if (lastHost && isLabelLine) {
+            if (portMatch) {
+                addLineFromLastHost(portMatch[1]);
+                continue;
+            }
+            addLineFromLastHost();
+        }
+
+        if (usernameMatch && !embyInfo.username) {
+            embyInfo.username = usernameMatch[1];
+        }
+        if (passwordMatch && !embyInfo.password) {
+            embyInfo.password = passwordMatch[1];
+        }
+
+        if (genericUrlMatch) {
+            const label = genericUrlMatch[1].trim();
+            const fullUrl = genericUrlMatch[2];
+            processUrlMatch({ title: label, url: fullUrl });
+        } else if (standaloneUrlMatch) {
+            processUrlMatch({ title: '线路', url: standaloneUrlMatch[1] });
+        } else if (portMatch && lastHost) {
+            addLineFromLastHost(portMatch[1]);
+        }
     }
 
-    match = trimmedLine.match(regexPatterns.standaloneUrl);
-    if (match) {
-      if (!/wiki|faka|notion|t\.me|推荐|续费/.test(trimmedLine)) {
-        embyInfo.lines.push({ title: '线路', url: match[1] });
-        lastHost = null;
-      }
-      continue;
-    }
-  }
+    addLineFromLastHost();
 
-  // 过滤格式不符合的 URL，简单校验 http(s)://host(:port)?
-  embyInfo.lines = embyInfo.lines.filter(line => {
-    if (!line.url) return false;
-    const urlStr = line.url.trim();
-    const simpleUrlPattern = /^https?:\/\/[\w\-.]+(:\d+)?\/?$/i;
-    if (!simpleUrlPattern.test(urlStr)) {
-      console.log(`格式不符，跳过: ${line.url}`);
-      return false;
-    }
-    return true;
-  });
+    const patterns = {
+        blacklist: /\b(wiki|faka|notion|t\.me|telegram|help)\b/i,
+        // validUrl: /^(https?:\/\/)([a-zA-Z0-9\-\.]+)+(:\d{1,5})?$/i,
+        validUrl: /^(https?:\/\/)[\w\.\-]+(:\d{1,5})?$/i,
+        port: /:(\d+)(?:[^\d]|$)/,
+        hasProtocol: /^https?:\/\//,
+        hasPort: /:\d+$/,
+        // httpsPort: /^(?:443|8443)$/
+    };
 
-  return embyInfo;
+    // 合并标准化和过滤逻辑，减少遍历次数
+    embyInfo.lines = embyInfo.lines.reduce((validLines, line) => {
+        if (!line.url) return validLines;
+        
+        let url = line.url.trim();
+        
+        // 黑名单检查
+        if (patterns.blacklist.test(url)) {
+            console.log(`黑名单过滤: ${line.url}`);
+            return validLines;
+        }
+        
+        try {
+            // URL标准化
+            if (!patterns.hasProtocol.test(url)) {
+                const portMatch = url.match(patterns.port);
+                if (portMatch) {
+                    const port = portMatch[1];
+                    // const protocol = patterns.httpsPort.test(port) ? 'https://' : 'http://';
+                    const protocol = (port === '443' || port === '8443') ? 'https://' : 'http://';
+                    url = `${protocol}${url}`;
+                } else {
+                    url = `https://${url}:443`;
+                }
+            } else {
+                // 添加默认端口（如果需要）
+                const parsedUrl = parseUrl(url);
+                if (parsedUrl && !parsedUrl.port && !patterns.hasPort.test(url)) {
+                    const defaultPort = url.startsWith('https://') ? ':443' : ':80';
+                    url += defaultPort;
+                }
+            }
+            
+            // 验证最终URL格式
+            if (patterns.validUrl.test(url)) {
+                validLines.push({ ...line, url });
+            } else {
+                console.log(`格式不符，跳过: ${line.url}`);
+            }
+        } catch (e) {
+            console.log(`URL处理错误: ${line.url}`, e);
+        }
+        
+        return validLines;
+    }, []);
+
+    return embyInfo;
+}
+
+function processEmbyLines(lines) {
+    if (!lines || lines.length === 0) return null;
+
+    function createLineInfo(line, index = 0) {
+        const parsedUrl = parseUrl(line.url.trim());
+        if (!parsedUrl) return null;
+        
+        const port = parsedUrl.port || (parsedUrl.protocol === 'https:' ? '443' : '80');
+        const scheme = parsedUrl.protocol.replace(':', '');
+        // const path = parsedUrl.pathname + parsedUrl.search + parsedUrl.hash;
+        // 修复路径处理
+        let path = parsedUrl.pathname + parsedUrl.search + parsedUrl.hash;
+        if (path === '/') path = ''; // 避免根路径的多余斜杠
+        
+        return {
+            index,
+            scheme,
+            host: parsedUrl.hostname,
+            port,
+            path,
+            title: line.title,
+            url: line.url,
+            fullAddress: `${scheme}://${parsedUrl.hostname}:${port}${path}`
+        };
+    }
+
+    const mainInfo = createLineInfo(lines[0]);
+    if (!mainInfo) return null;
+    
+    mainInfo.title = '主线路';
+    
+    let genericCounter = 1;
+    const backupLines = lines.slice(1)
+        .map((line, index) => createLineInfo(line, index + 1))
+        .filter(Boolean)
+        .map(line => {
+            if (line.title === '线路') {
+                line.title = `备用线路${genericCounter}`;
+                line.originalTitle = '线路';
+                genericCounter++;
+            }
+            return line;
+        });
+
+    return { main: mainInfo, backup: backupLines };
+}
+
+function buildSchemeUrl(baseUrl, params) {
+    const paramString = Object.entries(params)
+        .filter(([, value]) => value !== undefined && value !== '')
+        .map(([key, value]) => `${key}=${value}`)
+        .join('&');
+    
+    return `${baseUrl}?${paramString}`;
 }
 
 function generateForwardSchemeUrl(embyInfo) {
-  if (!embyInfo.lines || embyInfo.lines.length === 0) return null;
+    const processed = processEmbyLines(embyInfo.lines);
+    if (!processed) return null;
 
-  const rawUrl = embyInfo.lines[0].url.trim();
+    const { main, backup } = processed;
+    const params = {
+        type: 'emby',
+        scheme: main.scheme,
+        host: main.host,
+        port: main.port,
+        title: main.title,
+        username: embyInfo.username,
+        password: embyInfo.password
+    };
 
-  // 正则解析 scheme://host:port
-  const urlMatch = rawUrl.match(/^(https?):\/\/([^\/:]+)(?::(\d+))?/i);
-  if (!urlMatch) {
-    console.error(`主线路URL格式错误: ${rawUrl}`);
-    return null;
-  }
-  const scheme = urlMatch[1];
-  const host = urlMatch[2];
-  const port = urlMatch[3] || (scheme === 'https' ? '443' : '80');
+    // 添加备用线路
+    backup.forEach(line => {
+        const normalizedUrl = line.url.endsWith('/') ? line.url.slice(0, -1) : line.url;
+        params[`line${line.index}`] = normalizedUrl;
+        params[`line${line.index}title`] = line.title;
+    });
 
-  const genericTitles = ['线路', '地址', '服务器'];
-  const firstLineTitle = embyInfo.lines[0].title || host;
-  const title = genericTitles.includes(firstLineTitle) ? '' : firstLineTitle;
-
-  let url = `forward://import?type=emby&scheme=${scheme}&host=${host}&port=${port}&username=${embyInfo.username}&password=${embyInfo.password}`;
-  if (title) {
-    url += `&title=${title}`;
-  }
-
-  embyInfo.lines.slice(1).forEach((line, index) => {
-    const lineIndex = index + 1;
-    const normalizedUrl = line.url.endsWith('/') ? line.url.slice(0, -1) : line.url;
-    let lineTitle = line.title;
-    if (lineTitle === '线路') {
-      lineTitle = `备用线路${lineIndex}`;
-    }
-    url += `&line${lineIndex}=${normalizedUrl}&line${lineIndex}title=${lineTitle}`;
-  });
-
-  return url;
+    return buildSchemeUrl('forward://import', params);
 }
 
 function generateSenPlayerSchemeUrl(embyInfo) {
-  if (!embyInfo.lines || embyInfo.lines.length === 0) return null;
+    const processed = processEmbyLines(embyInfo.lines);
+    if (!processed) return null;
 
-  const rawUrl = embyInfo.lines[0].url.trim();
-  console.log("解析主线路URL", rawUrl);
+    const { main, backup } = processed;
+    const params = {
+        type: 'emby',
+        address: main.fullAddress,
+        username: embyInfo.username,
+        password: embyInfo.password
+    };
 
-  // 正则解析 scheme://host:port(/path)
-  const urlMatch = rawUrl.match(/^(https?):\/\/([^\/:]+)(?::(\d+))?(\/.*)?$/i);
-  if (!urlMatch) {
-    console.error(`主线路URL格式错误: ${rawUrl}`);
-    return null;
-  }
-  const scheme = urlMatch[1];
-  const host = urlMatch[2];
-  const port = urlMatch[3] || (scheme === 'https' ? '443' : '80');
-  const path = urlMatch[4] || '';
+    // 添加备用地址
+    backup.forEach(line => {
+        params[`address${line.index}`] = line.fullAddress;
+        params[`address${line.index}name`] = line.title;
+    });
 
-  // 构建主地址，包含端口和路径
-  let address = `${scheme}://${host}`;
-  if (port) {
-    address += `:${port}`;
-  }
-  address += path;
-
-  // 生成senplayer scheme URL，name和note默认为空
-  let url = `senplayer://importserver?type=emby&address=${address}&username=${embyInfo.username}&password=${embyInfo.password}`;
-
-  // 添加备用线路（从第二条线路开始）
-  embyInfo.lines.slice(1).forEach((line, index) => {
-    const lineIndex = index + 1; // 从address1开始
-    const lineRawUrl = line.url.trim();
-
-    // 解析备用线路url
-    const lineUrlMatch = lineRawUrl.match(/^(https?):\/\/([^\/:]+)(?::(\d+))?(\/.*)?$/i);
-    if (!lineUrlMatch) {
-      console.warn(`备用线路URL格式错误，跳过: ${lineRawUrl}`);
-      return; // 跳过格式错误的备用线路
-    }
-    const lineScheme = lineUrlMatch[1];
-    const lineHost = lineUrlMatch[2];
-    const linePort = lineUrlMatch[3] || (lineScheme === 'https' ? '443' : '80');
-    const linePath = lineUrlMatch[4] || '';
-
-    // 构建备用线路地址
-    let lineAddress = `${lineScheme}://${lineHost}`;
-    if (linePort) {
-      lineAddress += `:${linePort}`;
-    }
-    lineAddress += linePath;
-
-    // 线路标题如果是“线路”，替换成“备用线路${index+1}”
-    let lineTitle = line.title;
-    if (lineTitle === '线路') {
-      lineTitle = `备用线路${lineIndex}`;
-    }
-
-    // 拼接备用线路参数，不编码
-    url += `&address${lineIndex}=${lineAddress}&address${lineIndex}name=${lineTitle}`;
-  });
-
-  return url;
+    return buildSchemeUrl('senplayer://importserver', params);
 }
 
 async function run(configText) {
-  const embyInfo = parseEmbyInfo(configText);
-  return {
-    Forward: generateForwardSchemeUrl(embyInfo),
-    SenPlayer: generateSenPlayerSchemeUrl(embyInfo)
-  };
+    const embyInfo = parseEmbyInfo(configText);
+    return {
+        Forward: generateForwardSchemeUrl(embyInfo),
+        SenPlayer: generateSenPlayerSchemeUrl(embyInfo)
+    };
 }
 
-module.exports = { parseEmbyInfo, generateForwardSchemeUrl, generateSenPlayerSchemeUrl, run };
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { parseEmbyInfo, generateForwardSchemeUrl, generateSenPlayerSchemeUrl, run };
+}
