@@ -341,6 +341,7 @@ function generateSenPlayerSchemeUrl(embyInfo) {
     const { main, backup } = processed;
     const params = {
         type: 'emby',
+        title: main.title,
         address: main.fullAddress,
         username: embyInfo.username,
         password: embyInfo.password
