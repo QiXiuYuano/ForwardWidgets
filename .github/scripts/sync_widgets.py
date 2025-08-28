@@ -8,6 +8,7 @@ from packaging import version as packaging_version  # pip install packaging
 
 LOCAL_FWD = 'ForwardWidgets.fwd'
 SOURCES = [
+    ('QiXiuYuano', 'https://raw.githubusercontent.com/QiXiuYuano/ForwardWidgets/refs/heads/main/widgets.fwd'),
     ('huangxd', 'https://raw.githubusercontent.com/huangxd-/ForwardWidgets/refs/heads/main/widgets.fwd'),
     ('pack1r', 'https://raw.githubusercontent.com/pack1r/ForwardWidgets/refs/heads/main/pack1r.fwd'),
     ('两块', 'https://raw.githubusercontent.com/2kuai/ForwardWidgets/refs/heads/main/forward-widgets.fwd'),
