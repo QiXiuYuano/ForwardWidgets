@@ -227,7 +227,7 @@ async function searchDanmu(params) {
   try {
     // 调用弹弹play格式搜索API
     const response = await Widget.http.get(
-      `${server}/api/v2/search/anime?keyword=${encodeURIComponent(queryTitle)}`,
+      `${server}/api/v2/search/anime?keyword=${queryTitle}`,
       {
         headers: {
           "Content-Type": "application/json",
