@@ -46,23 +46,7 @@ WidgetMetadata = {
           value: "",
         },
       ],
-    },
-    {
-      name: "debug_mode",
-      title: "调试模式",
-      type: "enumeration",
-      value: "false",
-      enumOptions: [
-        {
-          title: "关闭",
-          value: "false",
-        },
-        {
-          title: "开启",
-          value: "true",
-        },
-      ],
-    },
+    }
   ],
   modules: [
     {
@@ -88,21 +72,8 @@ async function downloadDanmu(params) {
     season,
     episode,
     danmu_server_host,
-    api_key,
-    debug_mode
+    api_key
   } = params;
-
-  // 调试日志
-  if (debug_mode === "true") {
-    console.log(`${LOG_PREFIX} [调试] 弹幕下载参数:`, {
-      tmdbId,
-      type,
-      title,
-      season,
-      episode,
-      danmu_server_host
-    });
-  }
 
   // 参数验证
   if (!danmu_server_host) {
@@ -142,9 +113,8 @@ async function downloadDanmu(params) {
 
     // 依次尝试每个策略
     for (const strategy of searchStrategies) {
-      if (debug_mode === "true") {
         console.log(`${LOG_PREFIX} [调试] 使用${strategy.name}搜索:`, strategy.searchTerm);
-      }
+
 
       try {
         const result = await callImportAutoAPI({
@@ -155,23 +125,17 @@ async function downloadDanmu(params) {
         });
 
         if (result.success) {
-          if (debug_mode === "true") {
             console.log(`${LOG_PREFIX} [调试] ${strategy.name}搜索成功`);
-          }
           
           // 调用弹幕下载API后，必须监控任务状态直到完成
           const downloadResult = await waitForDownloadCompletion(result.data.taskId, params);
           return downloadResult;
         }
 
-        if (debug_mode === "true") {
           console.log(`${LOG_PREFIX} [调试] ${strategy.name}搜索失败，尝试下一个策略`);
-        }
 
       } catch (strategyError) {
-        if (debug_mode === "true") {
           console.log(`${LOG_PREFIX} [调试] ${strategy.name}搜索出错:`, strategyError.message);
-        }
         // 继续尝试下一个策略，不立即抛出错误
       }
     }
@@ -196,8 +160,7 @@ async function callImportAutoAPI(params) {
     searchTerm,
     season,
     episode,
-    mediaType,
-    debug_mode
+    mediaType
   } = params;
   // 构建请求URL
   const baseUrl = `${danmu_server_host}/api/control/import/auto`;
@@ -222,9 +185,9 @@ async function callImportAutoAPI(params) {
 
   const requestUrl = `${baseUrl}?${paramsObj.toString()}`;
 
-  if (debug_mode === "true") {
+
     console.log(`${LOG_PREFIX} [调试] 弹幕下载请求URL:`, requestUrl);
-  }
+
 
   try {
     const response = await Widget.http.post(requestUrl, null, {
@@ -235,9 +198,8 @@ async function callImportAutoAPI(params) {
       timeout: 30, // 30秒超时，因为导入可能需要时间
     });
 
-    if (debug_mode === "true") {
       console.log(`${LOG_PREFIX} [调试] 弹幕服务端响应:`, response.data);
-    }
+
 
     // 检查响应状态
     if (response.status === 202) {
@@ -257,9 +219,9 @@ async function callImportAutoAPI(params) {
     }
 
   } catch (error) {
-    if (debug_mode === "true") {
+
       console.error(`${LOG_PREFIX} [错误] ${searchType} 搜索请求失败:`, error);
-    }
+
     return {
       success: false,
       error: error.message,
@@ -273,11 +235,8 @@ async function callImportAutoAPI(params) {
  * 等待弹幕下载完成并返回最终结果
  */
 async function waitForDownloadCompletion(parentTaskId, params) {
-  const { debug_mode } = params;
-  
-  if (debug_mode === "true") {
+
     console.log(`${LOG_PREFIX} [调试] 等待弹幕下载完成，外部API自动导入ID: ${parentTaskId}`);
-  }
   
   try {
     // 步骤1: 等待外部API自动导入完成
@@ -302,9 +261,7 @@ async function waitForDownloadCompletion(parentTaskId, params) {
       };
     }
     
-    if (debug_mode === "true") {
       console.log(`${LOG_PREFIX} [调试] 找到弹幕下载子任务: ${subTask.taskId}`);
-    }
     
     // 步骤3: 等待子任务完成，这是获取弹幕下载状态的关键步骤
     const subTaskResult = await waitForTask(subTask.taskId, "弹幕下载任务", params);
@@ -336,21 +293,16 @@ async function waitForDownloadCompletion(parentTaskId, params) {
  * 监控任务进度
  */
 async function waitForTask(taskId, taskName, params) {
-  const { debug_mode } = params;
   let attempts = 0;
   const maxAttempts = 12; // 最多等待2分钟(10秒*12次)
   
-  if (debug_mode === "true") {
     console.log(`${LOG_PREFIX} [调试] 等待${taskName}完成: ${taskId}`);
-  }
   
   while (attempts < maxAttempts) {
     try {
       const taskInfo = await getTaskStatus(taskId, params);
       
-      if (debug_mode === "true") {
         console.log(`${LOG_PREFIX} [调试] ${taskName}状态: ${taskInfo.status}, 进度: ${taskInfo.progress}%`);
-      }
       
       // 检查任务是否完成
       if (taskInfo.status === 'COMPLETED' || taskInfo.status === '已完成') {
@@ -379,9 +331,7 @@ async function waitForTask(taskId, taskName, params) {
       await new Promise(resolve => setTimeout(resolve, 10000));
       attempts++;
     } catch (error) {
-      if (debug_mode === "true") {
         console.log(`${LOG_PREFIX} [调试] 检查${taskName}状态出错:`, error.message);
-      }
       attempts++;
     }
   }
@@ -399,40 +349,39 @@ async function waitForTask(taskId, taskName, params) {
  * 查找弹幕下载子任务
  */
 async function findDanmuDownloadTask(parentTaskId, params) {
-  const { debug_mode } = params;
-  
+
   try {
     // 获取最近的任务列表
-    const taskList = await getRecentTasks(15, params);
+    const taskList = await getRecentTasks(5, params);
 
     // 找到外部API自动导入在列表中的索引
     const parentTaskIndex = taskList.findIndex(task => task.taskId === parentTaskId);
 
     if (parentTaskIndex === -1) {
-      if (debug_mode === "true") {
+
         console.log(`${LOG_PREFIX} [调试] 未在任务列表中找到外部API自动导入: ${parentTaskId}`);
-      }
+
       return null;
     }
 
     // 外部API自动导入前面一个任务就是子任务（前提是外部API自动导入索引不是0）
     if (parentTaskIndex > 0) {
       const subTask = taskList[parentTaskIndex - 1];
-      if (debug_mode === "true") {
+
         console.log(`${LOG_PREFIX} [调试] 找到弹幕下载任务ID: ${subTask.taskId}, title: ${subTask.title}`);
-      }
+
       return subTask;
     } else {
-      if (debug_mode === "true") {
+
         console.log(`${LOG_PREFIX} [调试] 未找到弹幕下载任务`);
-      }
+
       return null;
     }
     
   } catch (error) {
-    if (debug_mode === "true") {
+
       console.log(`${LOG_PREFIX} [调试] 查找弹幕下载任务出错:`, error.message);
-    }
+
     return null;
   }
 }
@@ -441,7 +390,7 @@ async function findDanmuDownloadTask(parentTaskId, params) {
  * 获取任务状态
  */
 async function getTaskStatus(taskId, params) {
-  const { danmu_server_host, api_key, debug_mode } = params;
+  const { danmu_server_host, api_key } = params;
   
   try {
     const url = `${danmu_server_host}/api/control/tasks/${taskId}?api_key=${api_key}`;
@@ -473,8 +422,8 @@ async function getTaskStatus(taskId, params) {
 /**
  * 获取最近的任务列表
  */
-async function getRecentTasks(limit = 5, params) {
-  const { danmu_server_host, api_key, debug_mode } = params;
+async function getRecentTasks(limit = 5) {
+  const { danmu_server_host, api_key } = params;
   const url = `${danmu_server_host}/api/control/tasks?search=&status=all&api_key=${api_key}`;
 
   try {
