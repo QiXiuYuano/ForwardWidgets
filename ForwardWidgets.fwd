@@ -3,13 +3,13 @@
   "description": "精选优秀Widgets合集，仅供自用",
   "icon": "https://raw.githubusercontent.com/QiXiuYuano/ForwardWidgets/refs/heads/main/icon.png",
   "widgets": [
-		{
-      "id": "forward.misaka.danmu.download",
+    {
+      "id": "misaka.danmu.download",
       "title": "Misaka弹幕自动下载",
       "description": "自动调用Misaka弹幕服务端API下载弹幕数据",
-      "requiredVersion": "0.0.2",
+      "requiredVersion": "0.0.1",
       "version": "1.0.0",
-      "author": "Forward",
+      "author": "QiXiuYuano",
       "url": "https://raw.githubusercontent.com/QiXiuYuano/ForwardWidgets/refs/heads/main/misaka_danmu_download.js"
     },
     {
