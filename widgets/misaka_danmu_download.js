@@ -15,6 +15,7 @@
  * link: 链接，Optional
  * videoUrl: 视频链接，Optional
  */
+
 WidgetMetadata = {
   id: "misaka.danmu.download",
   title: "Misaka弹幕服务",
@@ -297,7 +298,7 @@ async function searchDanmu(params) {
         }
       }
     }
-    console.log(`${LOG_PREFIX} 弹幕搜索结果:`, animes);
+
     return {
       animes: animes,
     };
