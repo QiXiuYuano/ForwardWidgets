@@ -5,7 +5,7 @@
   "widgets": [
     {
       "id": "misaka.danmu.download",
-      "title": "Misaka弹幕自动下载",
+      "title": "Misaka弹幕服务",
       "description": "自动调用Misaka弹幕服务端API下载弹幕数据",
       "requiredVersion": "0.0.1",
       "version": "1.0.0",
