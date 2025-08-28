@@ -1,5 +1,5 @@
 /**
- * Misaka弹幕自动下载模块
+ * Misaka弹幕服务模块，支持自动下载
  * 目的：视频播放时自动调用弹幕服务端的 /api/control/import/auto 接口下载弹幕
  * 给 module 指定 type 为 danmu 后，默认会携带以下参数：
  * tmdbId: TMDB ID，Optional
@@ -17,10 +17,10 @@
  */
 WidgetMetadata = {
   id: "misaka.danmu.download",
-  title: "Misaka弹幕自动下载",
+  title: "Misaka弹幕服务",
   version: "1.0.1",
   requiredVersion: "0.0.2",
-  description: "自动调用Misaka弹幕服务端API下载弹幕数据",
+  description: "Misaka弹幕服务模块，支持调用、下载弹幕数据",
   author: "QiXiuYuano",
   site: "https://github.com/QiXiuYuano/ForwardWidgets",
   globalParams: [
