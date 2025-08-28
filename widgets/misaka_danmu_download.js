@@ -94,12 +94,8 @@ async function getCommentsById(params) {
   }
 
   // 从server参数中提取danmu_server_host
-  let danmu_server_host;
   try {
-    const url = new URL(server);
-    danmu_server_host = `${url.protocol}//${url.hostname}${
-      url.port ? ":" + url.port : ""
-    }`;
+    const danmu_server_host = server.match(/^(https?:\/\/[^/]+)/i)[1];
   } catch (e) {
     throw new Error("无效的服务器地址");
   }
