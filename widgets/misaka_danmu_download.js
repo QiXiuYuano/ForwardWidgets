@@ -83,7 +83,7 @@ const LOG_PREFIX = "[Misaka弹幕下载]";
  */
 async function getCommentsById(params) {
   const { tmdbId, type, title, season, episode, server, api_key } = params;
-
+  console.log("server 参数实际值:", server);
   // 参数验证
   if (!server) {
     throw new Error("弹幕服务器地址未配置");
