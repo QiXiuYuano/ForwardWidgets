@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+package.json
+
+# Build outputs
+dist/
+build/
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Generated files
+widgets/danmu.js
+test/
+generate-widget-index.js
+temp_widgets/
+# forward-widgets.fwd
