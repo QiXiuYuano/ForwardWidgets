@@ -251,6 +251,8 @@ async function searchDanmu(params) {
     // 开始过滤数据
     let animes = [];
     if (data.animes && data.animes.length > 0) {
+      
+      console.log(`${LOG_PREFIX}: 返回 anime.type =`, data.animes.map(a => a.type));
       animes = data.animes.filter((anime) => {
         if (
           (anime.type === "tvseries" || anime.type === "web") &&
@@ -263,7 +265,8 @@ async function searchDanmu(params) {
           return false;
         }
       });
-
+      console.log(`${LOG_PREFIX}: 过滤前数量 = ${data.animes.length}, 过滤后数量 = ${animes.length}`);
+      console.log(`${LOG_PREFIX}: 最终保留的条目 =`, animes.map(a => ({ title: a.animeTitle, type: a.type })));
       if (season && type === "tv") {
         // filter season
         const matchedAnimes = animes.filter((anime) => {
