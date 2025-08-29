@@ -76,7 +76,7 @@ WidgetMetadata = {
   ],
 };
 
-const LOG_PREFIX = "[Misaka弹幕下载]";
+const LOG_PREFIX = "[Misaka弹幕模块]";
 
 /**
  * 获取弹幕评论函数（主入口函数）
@@ -169,6 +169,8 @@ async function getCommentsById(params) {
         }
 
         // 获取弹幕评论
+        console.log(`${LOG_PREFIX} 目标剧集信息: ${JSON.stringify(targetEpisode)}`);
+        console.log(`${LOG_PREFIX}`, '💬 获取弹幕评论...');
         const comments = await getCommentsByIdInternal({
           ...params,
           commentId: targetEpisode.episodeId,
