@@ -128,9 +128,8 @@ async function getCommentsById(params) {
         // 根据季和集找到对应的剧集
         let targetEpisode = episodes[0]; // 默认使用第一集
 
-        console.log(`${LOG_PREFIX} 当前搜索弹幕集数`, episode);
-
         if (type === "tv" && season && episode) {
+          console.log(`${LOG_PREFIX} 当前搜索弹幕集数`, episode);
           const matchedEpisode = episodes.find(
             (ep) => String(ep.episodeNumber) === String(episode)
           );
@@ -854,10 +853,10 @@ async function retryGetDanmuAfterDownload(params) {
 
         if (episodes && episodes.length > 0) {
           let targetEpisode = episodes[0];
-          console.log(`${LOG_PREFIX}: 当前搜索弹幕集数`, episode);
           
           // 根据指定的季和集数精确匹配剧集
           if (type === "tv" && season && episode) {
+            console.log(`${LOG_PREFIX}: 当前搜索弹幕集数`, episode);
             const matchedEpisode = episodes.find(
               (ep) => String(ep.episodeNumber) === String(episode)
             );
