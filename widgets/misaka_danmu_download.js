@@ -105,15 +105,15 @@ async function getCommentsById(params) {
     throw new Error("缺少视频TMDB ID和标题信息");
   }
 
-  console.log(`${LOG_PREFIX}: 开始处理弹幕请求: ${title}`);
+  console.log(`${LOG_PREFIX} 开始处理弹幕请求: ${title}`);
 
   try {
-    console.log(`${LOG_PREFIX}: 尝试搜索弹幕: ${title}`);
+    console.log(`${LOG_PREFIX} 尝试搜索弹幕: ${title}`);
     const searchResult = await searchDanmu(params);
-    console.log(`${LOG_PREFIX}: 弹幕搜索结果: ${JSON.stringify(searchResult.animes, null, 2)}`);
+    console.log(`${LOG_PREFIX} 弹幕搜索结果: ${JSON.stringify(searchResult.animes, null, 2)}`);
     // 首先尝试搜索弹幕
     if (searchResult.animes && searchResult.animes.length > 0) {
-      console.log(`${LOG_PREFIX}: 搜索到弹幕，直接获取弹幕内容`);
+      console.log(`${LOG_PREFIX} 搜索到弹幕，直接获取弹幕内容`);
       // 如果搜索到弹幕，直接返回结果
       const anime = searchResult.animes[0];
 
@@ -123,12 +123,12 @@ async function getCommentsById(params) {
         animeId: anime.animeId,
         bangumiId: anime.bangumiId
       });
-      // console.log(`${LOG_PREFIX}: 剧集详情: ${JSON.stringify(episodes)}`);
+      // console.log(`${LOG_PREFIX} 剧集详情: ${JSON.stringify(episodes)}`);
       if (episodes && episodes.length > 0) {
         // 根据季和集找到对应的剧集
         let targetEpisode = episodes[0]; // 默认使用第一集
 
-        console.log(`${LOG_PREFIX}: 当前搜索弹幕集数`, episode);
+        console.log(`${LOG_PREFIX} 当前搜索弹幕集数`, episode);
 
         if (type === "tv" && season && episode) {
           const matchedEpisode = episodes.find(
@@ -139,7 +139,7 @@ async function getCommentsById(params) {
             targetEpisode = matchedEpisode;
           } else {
             // 如果没有精确匹配的集数，触发弹幕下载而不是使用近似集数
-            console.log(`${LOG_PREFIX}: 未找到第${episode}集，触发弹幕下载`);
+            console.log(`${LOG_PREFIX} 未找到第${episode}集，触发弹幕下载`);
 
             // 触发弹幕下载
             const downloadResult = await downloadDanmu({
@@ -150,7 +150,7 @@ async function getCommentsById(params) {
 
             // 弹幕下载成功后，使用渐进式重试机制获取弹幕
             if (downloadResult.success) {
-              console.log(`${LOG_PREFIX}: 弹幕下载成功，尝试获取弹幕内容`);
+              console.log(`${LOG_PREFIX} 弹幕下载成功，尝试获取弹幕内容`);
               const retryResult = await retryGetDanmuAfterDownload({
                 ...params,
                 downloadResult,
@@ -158,28 +158,24 @@ async function getCommentsById(params) {
 
               return retryResult;
             } else {
-              return {
-                success: false,
-                message: `弹幕下载失败: ${downloadResult.message}`,
-                from: "download",
-                data: null,
-              };
+              console.error(`${LOG_PREFIX} 弹幕下载失败: ${downloadResult.message}`);
+              return null;
             }
           }
         }
 
         // 获取弹幕评论
-        console.log(`${LOG_PREFIX}: 目标剧集信息: ${JSON.stringify(targetEpisode, null, 2)}`);
-        console.log(`${LOG_PREFIX}:`, '💬 获取弹幕评论...');
+        console.log(`${LOG_PREFIX} 目标剧集信息: ${JSON.stringify(targetEpisode, null, 2)}`);
+        console.log(`${LOG_PREFIX}`, '💬 获取弹幕评论...');
         const comments = await getCommentsByIdInternal({
           ...params,
           commentId: targetEpisode.episodeId,
         });
-        console.log(`${LOG_PREFIX}: 获取到 ${comments && comments.comments ? comments.comments.length : 0} 条弹幕`);
+        console.log(`${LOG_PREFIX} 获取到 ${comments && comments.comments ? comments.comments.length : 0} 条弹幕`);
         return comments;
       }
     } else {
-      console.log(`${LOG_PREFIX}: 未搜索到弹幕，尝试下载弹幕`);
+      console.log(`${LOG_PREFIX} 未搜索到弹幕，尝试下载弹幕`);
       // 如果没有搜索到弹幕，触发下载
       const downloadResult = await downloadDanmu({
         ...params,
@@ -189,7 +185,7 @@ async function getCommentsById(params) {
 
       // 弹幕下载成功后，使用渐进式重试机制获取弹幕
       if (downloadResult.success) {
-        console.log(`${LOG_PREFIX}: 弹幕下载成功，尝试获取弹幕内容`);
+        console.log(`${LOG_PREFIX} 弹幕下载成功，尝试获取弹幕内容`);
         const retryResult = await retryGetDanmuAfterDownload({
           ...params,
           downloadResult,
@@ -197,22 +193,13 @@ async function getCommentsById(params) {
 
         return retryResult;
       } else {
-        return {
-          success: false,
-          message: `弹幕下载失败: ${downloadResult.message}`,
-          from: "download",
-          data: null,
-        };
+        console.error(`${LOG_PREFIX} 弹幕下载失败: ${downloadResult.message}`);
+        return null;
       }
     }
   } catch (error) {
-    console.error(`${LOG_PREFIX}: 处理弹幕时出错:`, error);
-    return {
-      success: false,
-      message: `处理弹幕时出错: ${error.message}`,
-      from: "unknown",
-      data: null,
-    };
+    console.error(`${LOG_PREFIX} 处理弹幕时出错:`, error);
+    return null;
   }
 }
 
@@ -241,7 +228,7 @@ async function searchDanmu(params) {
     }
 
     const data = response.data;
-    console.log(`${LOG_PREFIX}: 搜索响应数据: ${JSON.stringify(data, null, 2)}`);
+    console.log(`${LOG_PREFIX} 搜索响应数据: ${JSON.stringify(data, null, 2)}`);
     
     // 检查API返回状态
     if (!data.success) {
@@ -251,8 +238,6 @@ async function searchDanmu(params) {
     // 开始过滤数据
     let animes = [];
     if (data.animes && data.animes.length > 0) {
-      
-      console.log(`${LOG_PREFIX}: 返回类型 =`, data.animes.map((a) => a.type), "| 传入的 type =", type);
       
       animes = data.animes.filter((anime) => {
         if (
@@ -266,8 +251,7 @@ async function searchDanmu(params) {
           return false;
         }
       });
-      console.log(`${LOG_PREFIX}: 过滤前数量 = ${data.animes.length}, 过滤后数量 = ${animes.length}`);
-      console.log(`${LOG_PREFIX}: 最终保留的条目 =`, animes.map(a => ({ title: a.animeTitle, type: a.type })));
+      
       if (season && type === "tv") {
         // filter season
         const matchedAnimes = animes.filter((anime) => {
@@ -302,12 +286,12 @@ async function searchDanmu(params) {
         }
       }
     }
-    console.log(`${LOG_PREFIX}: 搜索返回结果: ${JSON.stringify(animes, null, 2)}`);
+    //console.log(`${LOG_PREFIX} 搜索返回结果: ${JSON.stringify(animes, null, 2)}`);
     return {
       animes: animes,
     };
   } catch (error) {
-    console.error(`${LOG_PREFIX}: 搜索弹幕时出错:`, error);
+    console.error(`${LOG_PREFIX} 搜索弹幕时出错:`, error);
     return {
       animes: [],
     };
@@ -338,7 +322,7 @@ async function getDetailById(params) {
 
     return response.data.bangumi.episodes;
   } catch (error) {
-    console.error(`${LOG_PREFIX}: 获取详情时出错:`, error);
+    console.error(`${LOG_PREFIX} 获取详情时出错:`, error);
     return null;
   }
 }
@@ -368,7 +352,7 @@ async function getCommentsByIdInternal(params) {
 
       return response.data;
     } catch (error) {
-      console.error(`${LOG_PREFIX}: 获取弹幕时出错:`, error);
+      console.error(`${LOG_PREFIX} 获取弹幕时出错:`, error);
       return null;
     }
   }
@@ -858,17 +842,20 @@ async function retryGetDanmuAfterDownload(params) {
 
       // 再次尝试搜索并获取弹幕
       const retrySearchResult = await searchDanmu(params);
+      console.log(`${LOG_PREFIX} 弹幕搜索结果: ${JSON.stringify(retrySearchResult.animes, null, 2)}`);
       if (retrySearchResult.animes && retrySearchResult.animes.length > 0) {
         const anime = retrySearchResult.animes[0];
 
         const episodes = await getDetailById({
           ...params,
           animeId: anime.animeId,
+          bangumiId: anime.bangumiId
         });
 
         if (episodes && episodes.length > 0) {
           let targetEpisode = episodes[0];
-
+          console.log(`${LOG_PREFIX}: 当前搜索弹幕集数`, episode);
+          
           // 根据指定的季和集数精确匹配剧集
           if (type === "tv" && season && episode) {
             const matchedEpisode = episodes.find(
@@ -885,18 +872,17 @@ async function retryGetDanmuAfterDownload(params) {
               continue;
             }
           }
-
+          
+          console.log(`${LOG_PREFIX}: 目标剧集信息: ${JSON.stringify(targetEpisode, null, 2)}`);
+          console.log(`${LOG_PREFIX}:`, '💬 获取弹幕评论...');
           const comments = await getCommentsByIdInternal({
             ...params,
             commentId: targetEpisode.episodeId,
           });
-
-          return {
-            success: true,
-            message: "弹幕下载并获取成功",
-            from: "download",
-            data: comments,
-          };
+          
+          console.log(`${LOG_PREFIX}: 获取到 ${comments && comments.comments ? comments.comments.length : 0} 条弹幕`);
+          
+          return comments;
         }
       }
 
@@ -915,12 +901,5 @@ async function retryGetDanmuAfterDownload(params) {
     `${LOG_PREFIX} 弹幕下载成功但获取弹幕内容失败，总耗时: ${elapsed}ms`
   );
 
-  return {
-    success: false,
-    message: "弹幕下载成功，但未能获取弹幕内容",
-    from: "download",
-    data: null,
-    retryAttempts: retryStrategy.length,
-    totalTimeMs: elapsed,
-  };
+  return null;
 }
