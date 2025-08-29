@@ -252,7 +252,8 @@ async function searchDanmu(params) {
     let animes = [];
     if (data.animes && data.animes.length > 0) {
       
-      console.log(`${LOG_PREFIX}: 返回 anime.type =`, data.animes.map(a => a.type));
+      console.log(`${LOG_PREFIX}: 返回类型 =`, data.animes.map((a) => a.type), "| 传入的 type =", type);
+      
       animes = data.animes.filter((anime) => {
         if (
           (anime.type === "tvseries" || anime.type === "web") &&
