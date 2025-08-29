@@ -110,7 +110,8 @@ async function getCommentsById(params) {
   try {
     console.log(`${LOG_PREFIX}: 尝试搜索弹幕: ${title}`);
     const searchResult = await searchDanmu(params);
-    console.log(`${LOG_PREFIX}: 弹幕搜索结果: ${JSON.stringify(searchResult.animes)}`);
+    console.log(`${LOG_PREFIX}: 弹幕搜索结果: ${JSON.stringify(searchResult.animes, null, 2)}`);
+    console.log(`${LOG_PREFIX}: 弹幕搜索结果: ${searchResult.animes}`);
     // 首先尝试搜索弹幕
     if (searchResult.animes && searchResult.animes.length > 0) {
       console.log(`${LOG_PREFIX}: 搜索到弹幕，直接获取弹幕内容`);
@@ -169,19 +170,14 @@ async function getCommentsById(params) {
         }
 
         // 获取弹幕评论
-        console.log(`${LOG_PREFIX}: 目标剧集信息: ${targetEpisode}`);
+        console.log(`${LOG_PREFIX}: 目标剧集信息: ${JSON.stringify(targetEpisode, null, 2)}`);
         console.log(`${LOG_PREFIX}:`, '💬 获取弹幕评论...');
         const comments = await getCommentsByIdInternal({
           ...params,
           commentId: targetEpisode.episodeId,
         });
         console.log(`${LOG_PREFIX}: 获取到 ${comments && comments.comments ? comments.comments.length : 0} 条弹幕`);
-        return {
-          success: true,
-          message: "弹幕获取成功",
-          from: "search",
-          data: comments,
-        };
+        return comments;
       }
     } else {
       console.log(`${LOG_PREFIX}: 未搜索到弹幕，尝试下载弹幕`);
@@ -246,8 +242,7 @@ async function searchDanmu(params) {
     }
 
     const data = response.data;
-    console.log(`${LOG_PREFIX}: 搜索响应数据: ${JSON.stringify(data)}`);
-
+    
     // 检查API返回状态
     if (!data.success) {
       throw new Error(data.errorMessage || "API调用失败");
