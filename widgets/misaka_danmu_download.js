@@ -298,7 +298,7 @@ async function searchDanmu(params) {
         }
       }
     }
-
+    console.log(`${LOG_PREFIX}: 搜索返回结果: ${JSON.stringify(animes, null, 2)}`);
     return {
       animes: animes,
     };
