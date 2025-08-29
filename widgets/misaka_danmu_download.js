@@ -306,7 +306,7 @@ async function getDetailById(params) {
   try {
     // `${server}/api/v2/bangumi/A${animeId}`,
     const response = await Widget.http.get(
-      `${server}/api/v2/bangumi/${bangumiId}`,
+      `${server}/api/v2/bangumi/${animeId}`,
       {
         headers: {
           "Content-Type": "application/json",
