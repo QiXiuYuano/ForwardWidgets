@@ -111,7 +111,6 @@ async function getCommentsById(params) {
     console.log(`${LOG_PREFIX}: 尝试搜索弹幕: ${title}`);
     const searchResult = await searchDanmu(params);
     console.log(`${LOG_PREFIX}: 弹幕搜索结果: ${JSON.stringify(searchResult.animes, null, 2)}`);
-    console.log(`${LOG_PREFIX}: 弹幕搜索结果: ${searchResult.animes}`);
     // 首先尝试搜索弹幕
     if (searchResult.animes && searchResult.animes.length > 0) {
       console.log(`${LOG_PREFIX}: 搜索到弹幕，直接获取弹幕内容`);
@@ -242,6 +241,7 @@ async function searchDanmu(params) {
     }
 
     const data = response.data;
+    console.log(`${LOG_PREFIX}: 搜索响应数据: ${JSON.stringify(data, null, 2)}`);
     
     // 检查API返回状态
     if (!data.success) {
