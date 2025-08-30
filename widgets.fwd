@@ -11,6 +11,15 @@
       "version": "1.0.1",
       "author": "QiXiuYuano",
       "url": "https://raw.githubusercontent.com/QiXiuYuano/ForwardWidgets/refs/heads/main/widgets/misaka_danmu_download.js"
+    },
+		{
+      "id": "misaka.danmu.download.debug",
+      "title": "Misaka弹幕DEBUG",
+      "description": "自动调用Misaka弹幕服务端API下载弹幕数据",
+      "requiredVersion": "0.0.2",
+      "version": "1.0.1",
+      "author": "QiXiuYuano",
+      "url": "https://raw.githubusercontent.com/QiXiuYuano/ForwardWidgets/refs/heads/main/widgets/misaka_danmu_debug.js"
     }
   ]
 }
