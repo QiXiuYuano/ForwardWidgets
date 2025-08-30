@@ -13,7 +13,7 @@
       "url": "https://raw.githubusercontent.com/QiXiuYuano/ForwardWidgets/refs/heads/main/widgets/misaka_danmu_download.js"
     },
     {
-      "id": "misaka.danmu.download.debug",
+      "id": "misaka.danmu.debug",
       "title": "Misaka弹幕DEBUG",
       "description": "自动调用Misaka弹幕服务端API下载弹幕数据",
       "requiredVersion": "0.0.2",
