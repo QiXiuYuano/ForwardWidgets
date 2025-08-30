@@ -1,7 +1,7 @@
 
 WidgetMetadata = {
-  "id": "misaka.danmu.download.debug",
-  "title": "Misaka弹幕DEBUG",
+  id: "misaka.danmu.download.debug",
+  title: "Misaka弹幕DEBUG",
   version: "1.0.1",
   requiredVersion: "0.0.2",
   description: "Misaka弹幕服务模块，支持调用、下载弹幕数据",
