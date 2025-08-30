@@ -153,9 +153,9 @@ async function getCommentsById(params) {
           commentId: targetEpisode.episodeId,
         });
         console.log(`${LOG_PREFIX} 获取到 ${comments && comments.comments ? comments.comments.length : 0} 条弹幕`);
-        return comments;
         console.error(`${LOG_PREFIX} 弹幕响应:`, comments);
-    console.error(`${LOG_PREFIX} 弹幕响应（解析格式）:${JSON.stringify(comments, null, 2)}`);
+        console.error(`${LOG_PREFIX} 弹幕响应（解析格式）:${JSON.stringify(comments, null, 2)}`);
+        return comments;
       }
     } else {
       console.log(`${LOG_PREFIX} 未搜索到弹幕，尝试下载弹幕`);
@@ -332,10 +332,11 @@ async function getCommentsByIdInternal(params) {
       if (!response) {
         throw new Error("获取数据失败");
       }
-
-      return response.data;
-    console.error(`${LOG_PREFIX} 弹幕响应:`, response.data);
+      
+      console.error(`${LOG_PREFIX} 弹幕响应:`, response.data);
     console.error(`${LOG_PREFIX} 弹幕响应（解析格式）:${JSON.stringify(response.data, null, 2)}`);
+      return response.data;
+    
     } catch (error) {
       console.error(`${LOG_PREFIX} 获取弹幕时出错:`, error);
       return null;
