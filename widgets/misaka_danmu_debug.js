@@ -1,7 +1,7 @@
 
 WidgetMetadata = {
-  id: "misaka.danmu.download.debug",
-  title: "Misaka弹幕DEBUG",
+  id: "misaka.danmu.debug",
+  title: "Misaka弹幕服务",
   version: "1.0.1",
   requiredVersion: "0.0.2",
   description: "Misaka弹幕服务模块，支持调用、下载弹幕数据",
@@ -59,8 +59,7 @@ WidgetMetadata = {
   ],
 };
 
-const LOG_PREFIX = "[Misaka弹幕模块]";
-
+const LOG_PREFIX = "[Misaka弹幕DEBUG]";
 /**
  * 获取弹幕评论函数（主入口函数）
  * 首先尝试搜索弹幕，如果搜索不到则触发下载
