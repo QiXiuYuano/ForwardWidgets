@@ -1,7 +1,7 @@
 
 WidgetMetadata = {
   id: "misaka.danmu.debug",
-  title: "Misaka弹幕服务",
+  title: "Misaka弹幕DEBUG",
   version: "1.0.1",
   requiredVersion: "0.0.2",
   description: "Misaka弹幕服务模块，支持调用、下载弹幕数据",
@@ -333,8 +333,6 @@ async function getCommentsByIdInternal(params) {
         throw new Error("获取数据失败");
       }
       
-      console.error(`${LOG_PREFIX} 弹幕响应:`, response.data);
-    console.error(`${LOG_PREFIX} 弹幕响应（解析格式）:${JSON.stringify(response.data, null, 2)}`);
       return response.data;
     
     } catch (error) {
