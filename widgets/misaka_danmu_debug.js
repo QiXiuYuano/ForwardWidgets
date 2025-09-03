@@ -59,25 +59,80 @@ WidgetMetadata = {
     ],
 };
 
-async function searchDanmu(params) {
-    const { tmdbId, type, title, season, episode, link, videoUrl, server } = params;
+// async function searchDanmu(params) {
+//   const { tmdbId, type, title, season, episode, link, videoUrl, server } = params;
 
-    return {
-        animes: [
-            {
-                "animeId": 1101,
-                "bangumiId": "string",
-                "animeTitle": title,
-                "type": "tvseries",
-                "typeDescription": "string",
-                "imageUrl": "string",
-                "startDate": "2025-09-01T15:00:00.189Z",
-                "episodeCount": 12,
-                "rating": 0,
-                "isFavorited": true
-            }
-        ]
-    };
+//   return {
+//     animes: [
+//       {
+//         "animeId": 1101,
+//         "bangumiId": "string",
+//         "animeTitle": title,
+//         "type": "tvseries",
+//         "typeDescription": "string",
+//         "imageUrl": "string",
+//         "startDate": "2025-09-01T15:00:00.189Z",
+//         "episodeCount": 12,
+//         "rating": 0,
+//         "isFavorited": true
+//       }
+//     ]
+//   };
+// }
+
+async function searchDanmu(params) {
+  const { tmdbId, type, title, season, episode, server } = params;
+
+  let queryTitle = title;
+
+  if (season) {
+    queryTitle = `${title} S${season}`;
+  }
+
+  let searchUrl = `${server}/api/v2/search/episodes?anime=${queryTitle}`;
+  if (episode) {
+    searchUrl += `&episode=${episode}`;
+  }
+
+  // 调用 /search/episodes API - 使用Widget.http.get
+  const response = await Widget.http.get(searchUrl, {
+    headers: {
+      "Content-Type": "application/json",
+      "User-Agent": "ForwardWidgets/1.0.0",
+    },
+  });
+
+  if (!response) {
+    throw new Error("获取数据失败");
+  }
+
+  const data = response.data;
+
+  // 检查API返回状态
+  if (!data.success) {
+    throw new Error(data.errorMessage || "API调用失败");
+  }
+
+  // 直接从 /search/episodes 响应中获取番剧和分集信息
+  let animes = [];
+  if (data.animes && Array.isArray(data.animes) && data.animes.length > 0) {
+    // 根据类型过滤番剧
+    animes = data.animes.filter((anime) => {
+      if (
+        (anime.type === "tvseries" || anime.type === "web") &&
+        type === "tv"
+      ) {
+        return true;
+      } else if (anime.type === "movie" && type === "movie") {
+        return true;
+      } else {
+        return false;
+      }
+    });
+  }
+  return {
+    animes: animes,
+  };
 }
 
 
