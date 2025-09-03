@@ -19,20 +19,20 @@
  */
 WidgetMetadata = {
   id: "misaka.danmu.debug",
-  title: "Misaka弹幕DEBUG",
+  title: "Misaka DEBUG",
   version: "1.0.0",
   requiredVersion: "0.0.2",
-  description: "Misaka弹幕服务模块，支持调用、下载弹幕数据",
+  description: "Misaka弹幕服务模块DEBUG",
   author: "QiXiuYuano",
   site: "https://github.com/QiXiuYuano/ForwardWidgets",
   globalParams: [
     {
       name: "server",
-      title: "自定义服务器",
+      title: "弹幕服务器",
       type: "input",
       placeholders: [
         {
-          title: "弹弹play",
+          title: "服务器地址",
           value: "https://api.dandanplay.net",
         },
       ],
@@ -117,9 +117,42 @@ async function searchDanmu(params) {
 }
 
 
-
 async function getCommentsById(params) {
+    
   const { server, commentId, link, videoUrl, season, episode, tmdbId, type, title } = params;
+
+  // 如果没有commentId，先调用searchDanmu进行查询
+  if (!commentId && title) {
+    try {
+      console.log('开始调用searchDanmu查询弹幕...');
+      const searchResult = await searchDanmu({
+        title,
+        season,
+        episode,
+        type,
+        server
+      });
+      
+      if (searchResult.animes && searchResult.animes.length > 0) {
+        const anime = searchResult.animes[0];
+        if (anime.episodes && anime.episodes.length > 0) {
+          const firstEpisode = anime.episodes[0];
+          console.log(`找到分集: ${firstEpisode.episodeTitle} (ID: ${firstEpisode.episodeId})`);
+          // 使用找到的episodeId作为commentId
+          commentId = firstEpisode.episodeId;
+        } else {
+          console.log('未找到分集信息');
+          return null;
+        }
+      } else {
+        console.log('未找到相关动漫');
+        return null;
+      }
+    } catch (error) {
+      console.error('搜索弹幕时出错:', error);
+      return null;
+    }
+  }
 
   if (commentId) {
     // 调用弹弹play弹幕API - 使用Widget.http.get
