@@ -165,15 +165,14 @@ async function searchDanmu(params) {
         };
     });
 
-    // return {
-    //     animes: resultAnimes
-    // };
-    return resultAnimes
+    return {
+        animes: resultAnimes
+    };
 }
 
 
 async function getCommentsById(params) {
-    const { animeId, bangumiId, commentId, tmdbId,  type, title, season, episode, server, api_key } = params;
+    const { animeId, bangumiId, commentId, tmdbId, type, title, season, episode, server, api_key } = params;
 
     let danmakuId = commentId ?? animeId ?? bangumiId;
     console.log(`danmakuId: ${danmakuId}`);
