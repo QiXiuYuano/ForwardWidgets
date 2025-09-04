@@ -21,9 +21,9 @@
 WidgetMetadata = {
     id: "misaka.danmaku.debug",
     title: "Misaka DEBUG",
-    version: "0.0.2",
+    version: "1.0.0",
     requiredVersion: "0.0.2",
-    description: "Misaka弹幕服务模块DEBUG",
+    description: "御坂弹幕模块",
     author: "QiXiuYuano",
     site: "https://github.com/QiXiuYuano/ForwardWidgets",
     globalParams: [
@@ -173,7 +173,9 @@ async function searchDanmu(params) {
 
 
 async function getCommentsById(params) {
-    const { animeId, commentId, server, type, title, season, episode } = params;
+    const { animeId, commentId, tmdbId,  type, title, season, episode, server, api_key } = params;
+
+    const animes = await searchDanmu(params);
 
     let danmakuId = commentId ?? animeId;
     console.log(`danmakuId: ${danmakuId}`);
