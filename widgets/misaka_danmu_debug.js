@@ -159,6 +159,7 @@ async function searchDanmu(params) {
             }
         }
 
+        Widget.storage.get('animeId', episode.episodeId);
         return {
             animeId: episode.episodeId,
             animeTitle
@@ -172,9 +173,9 @@ async function searchDanmu(params) {
 
 
 async function getCommentsById(params) {
-    const { animeId, bangumiId, commentId, tmdbId, type, title, season, episode, server, api_key } = params;
+    const { animeId, episodeId, commentId, tmdbId, type, title, season, episode, server, api_key } = params;
 
-    let danmakuId = commentId ?? animeId ?? bangumiId;
+    let danmakuId = commentId ?? animeId ?? episodeId;
     console.log(`danmakuId: ${danmakuId}`);
 
     if (danmakuId) {
