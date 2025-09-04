@@ -83,7 +83,6 @@ const PROVIDER_NAMES = {
 
 async function searchDanmu(params) {
     const { tmdbId, type, title, season, episode, server, api_key } = params;
-
     if (!server || !api_key) {
         throw new Error("server、api_key未配置");
     }
@@ -95,6 +94,7 @@ async function searchDanmu(params) {
         console.error("无效的服务器地址");
         return;
     }
+
 
     let queryTitle = title;
 
@@ -133,7 +133,11 @@ async function searchDanmu(params) {
 
     const anime = searchResult.animes[0];
 
-    const sources = await getSourcesInfo({ server_host, api_key, animeId: anime.animeId });
+    const sources = await getSourcesInfo({
+        server_host,
+        api_key,
+        animeId: anime.animeId
+    });
 
     const resultAnimes = anime.episodes.map((episode, index) => {
         let animeTitle;
@@ -157,7 +161,7 @@ async function searchDanmu(params) {
         }
 
         return {
-            commentId: episode.episodeId,
+            animeId: episode.episodeId,
             animeTitle
         };
     });
@@ -171,10 +175,13 @@ async function searchDanmu(params) {
 async function getCommentsById(params) {
     const { animeId, commentId, server, type, title, season, episode } = params;
 
-    if (commentId) {
+    let danmakuId = commentId ?? animeId;
+    console.log(`danmakuId: ${danmakuId}`);
+
+    if (danmakuId) {
         // 调用弹弹play弹幕API - 使用Widget.http.get
         const response = await Widget.http.get(
-            `${server}/api/v2/comment/${commentId}?withRelated=true&chConvert=1`,
+            `${server}/api/v2/comment/${danmakuId}?withRelated=true&chConvert=1`,
             {
                 headers: {
                     "Content-Type": "application/json",
@@ -189,7 +196,8 @@ async function getCommentsById(params) {
 
         return response.data;
     }
-    return null;
+    // return null;
+    return generateDanmu(`未读取到弹幕，commentId: ${commentId}, animeId: ${animeId}`, 1);
 }
 
 
@@ -220,4 +228,34 @@ async function getSourcesInfo(params) {
         console.error(`获取数据源失败: ${error.message}`);
         return null;
     }
+}
+
+function generateDanmu(message, count) {
+    const comments = [];
+    const baseP = "1,1,25,16777215,1754803089,0,0,26732601000067074,1"; // 原始 p 字符串
+
+    for (let i = 0; i < count; i++) {
+        // 增加 cid
+        const cid = i;
+
+        // 修改 p 的第一位数字，加 5
+        const pParts = baseP.split(",");
+        pParts[0] = (parseInt(pParts[0], 10) + i * 5).toString(); // 每次增加 i * 5
+        const updatedP = pParts.join(",");
+
+        // 使用传入的 m 参数
+        const m = message;
+
+        // 生成每个弹幕对象
+        comments.push({
+            cid: cid,
+            p: updatedP,
+            m: m,
+        });
+    }
+
+    return {
+        count: comments.length,
+        comments: comments,
+    };
 }
