@@ -4,15 +4,6 @@
   "icon": "https://raw.githubusercontent.com/QiXiuYuano/ForwardWidgets/refs/heads/main/icon.png",
   "widgets": [
     {
-      "id": "misaka.danmaku.debug",
-      "title": "Misaka DEBUG",
-      "description": "御坂弹幕模块",
-      "requiredVersion": "0.0.2",
-      "version": "1.0.0",
-      "author": "QiXiuYuano",
-      "url": "https://raw.githubusercontent.com/QiXiuYuano/ForwardWidgets/refs/heads/main/widgets/misaka_danmu_debug.js"
-    },
-    {
       "id": "trakt",
       "title": "Trakt我看&Trakt个性化推荐",
       "description": "解析Trakt想看、在看、已看、片单、追剧日历以及根据个人数据生成的个性化推荐",
