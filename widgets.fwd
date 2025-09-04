@@ -1,7 +1,7 @@
 {
   "title": "Forward Widgets Test",
   "description": "Forward Widgets by QiXiuYuano",
-  "icon": "https://raw.githubusercontent.com/QiXiuYuano/Profiles/main/icon/forward-widget.png",
+  "icon": "https://raw.githubusercontent.com/QiXiuYuano/ForwardWidgets/refs/heads/main/icon.png",
   "widgets": [
     {
       "id": "misaka.danmaku.debug",
