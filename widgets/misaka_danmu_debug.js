@@ -200,7 +200,8 @@ async function getCommentsById(params) {
         return response.data;
     }
     // return null;
-    const debug_data = generateDanmu(`未读取到弹幕，commentId: ${commentId}, animeId: ${animeId}`, 30);
+    const debug_data = generateDanmu(`未读取到弹幕，commentId: ${commentId}, 
+        animeId: ${animeId}, bangumiId:${bangumiId}`, 2);
     return debug_data;
 }
 
@@ -238,13 +239,15 @@ function generateDanmu(message, count) {
     const comments = [];
     const baseP = "1,1,25,16777215,1754803089,0,0,26732601000067074,1"; // 原始 p 字符串
 
-    for (let i = 0; i < count; i++) {
+    // 生成更多弹幕，每2秒一条，持续更长时间
+    const totalDanmu = count * 30; // 生成30倍数量的弹幕
+    for (let i = 0; i < totalDanmu; i++) {
         // 增加 cid
         const cid = i;
 
-        // 修改 p 的第一位数字，加 5
+        // 修改 p 的第一位数字，每2秒一条弹幕
         const pParts = baseP.split(",");
-        pParts[0] = (parseInt(pParts[0], 10) + i * 5).toString(); // 每次增加 i * 5
+        pParts[0] = (i * 2).toString(); // 每2秒一条弹幕，从0秒开始
         const updatedP = pParts.join(",");
 
         // 使用传入的 m 参数
