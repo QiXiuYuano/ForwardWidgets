@@ -173,12 +173,12 @@ async function searchDanmu(params) {
 
 
 async function getCommentsById(params) {
-    const { animeId, commentId, tmdbId,  type, title, season, episode, server, api_key } = params;
+    const { animeId, bangumiId, commentId, tmdbId,  type, title, season, episode, server, api_key } = params;
 
     const animes = await searchDanmu(params);
     console.log(animes);
 
-    let danmakuId = commentId ?? animeId;
+    let danmakuId = commentId ?? animeId ?? bangumiId;
     console.log(`danmakuId: ${danmakuId}`);
 
     if (danmakuId) {
