@@ -173,11 +173,15 @@ async function searchDanmu(params) {
 
 
 async function getCommentsById(params) {
-    const { animeId, episodeId, commentId, tmdbId, type, title, season, episode, server, api_key } = params;
+    const { animeId, commentId, tmdbId, type, title, season, episode, server, api_key } = params;
 
-    let danmakuId = commentId ?? animeId ?? episodeId;
+    let danmakuId = commentId ?? animeId;
     console.log(`danmakuId: ${danmakuId}`);
 
+    const debug_data1 = generateDanmu(`未读取到弹幕，animeId: ${animeId}, danmakuId:${danmakuId}`, 2);
+    Widget.storage.clear();
+    return debug_data1;
+    
     if (danmakuId) {
         // 调用弹弹play弹幕API - 使用Widget.http.get
         const response = await Widget.http.get(
