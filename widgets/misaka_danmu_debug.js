@@ -159,7 +159,7 @@ async function searchDanmu(params) {
             }
         }
 
-        Widget.storage.get('animeId', episode.episodeId);
+        Widget.storage.set('animeId', episode.episodeId);
         return {
             animeId: episode.episodeId,
             animeTitle
@@ -175,7 +175,8 @@ async function searchDanmu(params) {
 async function getCommentsById(params) {
     const { animeId, commentId, tmdbId, type, title, season, episode, server, api_key } = params;
 
-    let danmakuId = commentId ?? animeId;
+    let storage_data = Widget.storage.get('animeId');
+    let danmakuId = commentId ?? animeId ?? storage_data;
     console.log(`danmakuId: ${danmakuId}`);
 
     const debug_data1 = generateDanmu(`未读取到弹幕，animeId: ${animeId}, danmakuId:${danmakuId}`, 2);
