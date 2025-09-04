@@ -6,9 +6,9 @@
     {
       "id": "misaka.danmaku.debug",
       "title": "Misaka DEBUG",
-      "description": "Misaka弹幕服务模块DEBUG",
+      "description": "Misaka弹幕模块DEBUG",
       "requiredVersion": "0.0.2",
-      "version": "1.0.0",
+      "version": "0.0.2",
       "author": "QiXiuYuano",
       "url": "https://raw.githubusercontent.com/QiXiuYuano/ForwardWidgets/refs/heads/main/widgets/misaka_danmu_debug.js"
     },
