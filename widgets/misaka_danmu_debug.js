@@ -159,10 +159,10 @@ async function searchDanmu(params) {
             }
         }
 
-        Widget.storage.set('animeId', episode.episodeId);
         return {
-            animeId: episode.episodeId,
-            animeTitle
+            animeId: anime.animeId,
+            animeTitle,
+            episodeId: episode.episodeId,
         };
     });
 
@@ -173,16 +173,11 @@ async function searchDanmu(params) {
 
 
 async function getCommentsById(params) {
-    const { animeId, commentId, tmdbId, type, title, season, episode, server, api_key } = params;
+    const { animeId, episodeId, commentId, tmdbId, type, title, season, episode, server, api_key } = params;
 
-    let storage_data = Widget.storage.get('animeId');
-    let danmakuId = commentId ?? animeId ?? storage_data;
+    let danmakuId = commentId ?? episodeId;
     console.log(`danmakuId: ${danmakuId}`);
 
-    const debug_data1 = generateDanmu(`未读取到弹幕，animeId: ${animeId}, danmakuId:${danmakuId}`, 2);
-    Widget.storage.clear();
-    return debug_data1;
-    
     if (danmakuId) {
         // 调用弹弹play弹幕API - 使用Widget.http.get
         const response = await Widget.http.get(
@@ -202,7 +197,7 @@ async function getCommentsById(params) {
         return response.data;
     }
     // return null;
-    const debug_data = generateDanmu(`未读取到弹幕，animeId: ${animeId}, bangumiId:${bangumiId}`, 2);
+    const debug_data = generateDanmu(`未读取到弹幕，animeId: ${animeId}, episodeId:${episodeId}`, 2);
     return debug_data;
 }
 
