@@ -63,7 +63,7 @@ WidgetMetadata = {
             //id需固定为getComments
             id: "getComments",
             title: "获取弹幕",
-            functionName: "getCommentsById",
+            functionName: "getComments",
             type: "danmu",
             params: [],
         },
@@ -172,7 +172,7 @@ async function searchDanmu(params) {
 }
 
 
-async function getCommentsById(params) {
+async function getComments(params) {
     const { bangumiId, commentId, tmdbId,  type, title, season, episode, server, api_key } = params;
 
     // const animes = await searchDanmu(params);
