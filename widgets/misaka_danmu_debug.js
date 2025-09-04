@@ -57,7 +57,7 @@ WidgetMetadata = {
             title: "搜索弹幕",
             functionName: "searchDanmu",
             type: "danmu",
-            // params: [],
+            params: [],
         },
         {
             //id需固定为getComments
@@ -65,7 +65,7 @@ WidgetMetadata = {
             title: "获取弹幕",
             functionName: "getCommentsById",
             type: "danmu",
-            // params: [],
+            params: [],
         },
     ],
 };
