@@ -63,7 +63,7 @@ WidgetMetadata = {
             //id需固定为getComments
             id: "getComments",
             title: "获取弹幕",
-            functionName: "getComments",
+            functionName: "getCommentsById",
             type: "danmu",
             params: [],
         },
@@ -161,8 +161,8 @@ async function searchDanmu(params) {
         }
 
         return {
-            bangumiId: episode.episodeId,
-            animeTitle: animeTitle
+            animeId: episode.episodeId,
+            animeTitle
         };
     });
 
@@ -172,12 +172,13 @@ async function searchDanmu(params) {
 }
 
 
-async function getComments(params) {
-    const { bangumiId, commentId, tmdbId,  type, title, season, episode, server, api_key } = params;
+async function getCommentsById(params) {
+    const { animeId, commentId, tmdbId,  type, title, season, episode, server, api_key } = params;
 
-    // const animes = await searchDanmu(params);
+    const animes = await searchDanmu(params);
+    console.log(animes);
 
-    let danmakuId = commentId ?? bangumiId;
+    let danmakuId = commentId ?? animeId;
     console.log(`danmakuId: ${danmakuId}`);
 
     if (danmakuId) {
@@ -199,7 +200,7 @@ async function getComments(params) {
         return response.data;
     }
     // return null;
-    const debug_data = generateDanmu(`未读取到弹幕，commentId: ${commentId}, bangumiId: ${bangumiId}`, 1);
+    const debug_data = generateDanmu(`未读取到弹幕，commentId: ${commentId}, animeId: ${animeId}`, 30);
     return debug_data;
 }
 
