@@ -175,7 +175,7 @@ async function searchDanmu(params) {
 async function getCommentsById(params) {
     const { animeId, commentId, tmdbId,  type, title, season, episode, server, api_key } = params;
 
-    const animes = await searchDanmu(params);
+    // const animes = await searchDanmu(params);
 
     let danmakuId = commentId ?? animeId;
     console.log(`danmakuId: ${danmakuId}`);
@@ -199,7 +199,8 @@ async function getCommentsById(params) {
         return response.data;
     }
     // return null;
-    return generateDanmu(`未读取到弹幕，commentId: ${commentId}, animeId: ${animeId}`, 1);
+    const debug_data = generateDanmu(`未读取到弹幕，commentId: ${commentId}, animeId: ${animeId}`, 1);
+    return debug_data;
 }
 
 
