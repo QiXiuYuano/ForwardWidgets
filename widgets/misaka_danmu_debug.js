@@ -21,7 +21,7 @@
 WidgetMetadata = {
     id: "misaka.danmaku.debug",
     title: "Misaka DEBUG",
-    version: "1.0.0",
+    version: "0.0.2",
     requiredVersion: "0.0.2",
     description: "Misaka弹幕服务模块DEBUG",
     author: "QiXiuYuano",
