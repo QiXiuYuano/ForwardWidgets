@@ -165,9 +165,10 @@ async function searchDanmu(params) {
         };
     });
 
-    return {
-        animes: resultAnimes
-    };
+    // return {
+    //     animes: resultAnimes
+    // };
+    return resultAnimes
 }
 
 
