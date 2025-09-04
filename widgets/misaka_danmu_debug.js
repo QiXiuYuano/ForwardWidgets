@@ -200,7 +200,7 @@ async function getCommentsById(params) {
         return response.data;
     }
     // return null;
-    const debug_data = generateDanmu(`未读取到弹幕，commentId: ${commentId}, animeId: ${animeId}, bangumiId:${bangumiId}`, 2);
+    const debug_data = generateDanmu(`未读取到弹幕，animeId: ${animeId}, bangumiId:${bangumiId}`, 2);
     return debug_data;
 }
 
