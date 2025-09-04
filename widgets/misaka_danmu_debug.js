@@ -161,8 +161,8 @@ async function searchDanmu(params) {
         }
 
         return {
-            animeId: episode.episodeId,
-            animeTitle
+            bangumiId: episode.episodeId,
+            animeTitle: animeTitle
         };
     });
 
@@ -173,11 +173,11 @@ async function searchDanmu(params) {
 
 
 async function getCommentsById(params) {
-    const { animeId, commentId, tmdbId,  type, title, season, episode, server, api_key } = params;
+    const { bangumiId, commentId, tmdbId,  type, title, season, episode, server, api_key } = params;
 
     // const animes = await searchDanmu(params);
 
-    let danmakuId = commentId ?? animeId;
+    let danmakuId = commentId ?? bangumiId;
     console.log(`danmakuId: ${danmakuId}`);
 
     if (danmakuId) {
@@ -199,7 +199,7 @@ async function getCommentsById(params) {
         return response.data;
     }
     // return null;
-    const debug_data = generateDanmu(`未读取到弹幕，commentId: ${commentId}, animeId: ${animeId}`, 1);
+    const debug_data = generateDanmu(`未读取到弹幕，commentId: ${commentId}, bangumiId: ${bangumiId}`, 1);
     return debug_data;
 }
 
