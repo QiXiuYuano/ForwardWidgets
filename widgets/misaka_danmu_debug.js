@@ -19,7 +19,7 @@
  */
 
 WidgetMetadata = {
-    id: "misaka.danmu.debug",
+    id: "misaka.danmaku.debug",
     title: "Misaka DEBUG",
     version: "1.0.0",
     requiredVersion: "0.0.2",
@@ -35,6 +35,17 @@ WidgetMetadata = {
                 {
                     title: "服务器地址",
                     value: "https://api.dandanplay.net",
+                },
+            ],
+        },
+        {
+            name: "api_key",
+            title: "外部API Key",
+            type: "input",
+            placeholders: [
+                {
+                    title: "API Key",
+                    value: "",
                 },
             ],
         },
@@ -59,92 +70,35 @@ WidgetMetadata = {
     ],
 };
 
-// async function searchDanmu(params) {
-//   const { tmdbId, type, title, season, episode, link, videoUrl, server } = params;
+const PROVIDER_NAMES = {
+    tencent: "腾讯视频",
+    iqiyi: "爱奇艺",
+    youku: "优酷视频",
+    bilibili: "哔哩哔哩",
+    mgtv: "芒果TV",
+    renren: "人人影视",
+    gamer: "巴哈姆特"
+};
 
-//   return {
-//     animes: [
-//       {
-//         "animeId": 1101,
-//         "bangumiId": "string",
-//         "animeTitle": title,
-//         "type": "tvseries",
-//         "typeDescription": "string",
-//         "imageUrl": "string",
-//         "startDate": "2025-09-01T15:00:00.189Z",
-//         "episodeCount": 12,
-//         "rating": 0,
-//         "isFavorited": true
-//       }
-//     ]
-//   };
-// }
 
 async function searchDanmu(params) {
-  const { tmdbId, type, title, season, episode, server } = params;
+    const { tmdbId, type, title, season, episode, server, api_key } = params;
 
-  let queryTitle = title;
-
-  if (season) {
-    queryTitle = `${title} S${season}`;
-  }
-
-  let searchUrl = `${server}/api/v2/search/episodes?anime=${queryTitle}`;
-  if (episode) {
-    searchUrl += `&episode=${episode}`;
-  }
-
-  // 调用 /search/episodes API - 使用Widget.http.get
-  const response = await Widget.http.get(searchUrl, {
-    headers: {
-      "Content-Type": "application/json",
-      "User-Agent": "ForwardWidgets/1.0.0",
-    },
-  });
-
-  if (!response) {
-    throw new Error("获取数据失败");
-  }
-
-  const data = response.data;
-
-  // 检查API返回状态
-  if (!data.success) {
-    throw new Error(data.errorMessage || "API调用失败");
-  }
-
-  // 直接从 /search/episodes 响应中获取番剧和分集信息
-  let animes = [];
-  if (data.animes && Array.isArray(data.animes) && data.animes.length > 0) {
-    // 根据类型过滤番剧
-    animes = data.animes.filter((anime) => {
-      if (
-        (anime.type === "tvseries" || anime.type === "web") &&
-        type === "tv"
-      ) {
-        return true;
-      } else if (anime.type === "movie" && type === "movie") {
-        return true;
-      } else {
-        return false;
-      }
-    });
-  }
-  return {
-    animes: animes,
-  };
-}
-
-
-async function getCommentsById(params) {
-    const { commentId, server, tmdbId, type, title, season, episode, link, videoUrl, seriesName,
-        episodeName, airDate, runtime, premiereDate } = params;
-    // const { commentId, server, link, videoUrl, season, episode, tmdbId, type, title } = params;
+    if (!server || !api_key) {
+        throw new Error("server、api_key未配置");
+    }
+    // 从server参数中提取server_host
+    let server_host;
+    try {
+        server_host = server.match(/^(https?:\/\/[^/]+)/i)[1];
+    } catch (e) {
+        console.error("无效的服务器地址");
+        return;
+    }
 
     let queryTitle = title;
 
-    // 如果有season参数，调整title格式为 "title S{season}"
-    if (season) {
+    if (type === "tv" && season) {
         queryTitle = `${title} S${season}`;
     }
 
@@ -153,7 +107,7 @@ async function getCommentsById(params) {
         searchUrl += `&episode=${episode}`;
     }
 
-    // 调用 /search/episodes API - 使用Widget.http.get
+    // 调用 /search/episodes API
     const response = await Widget.http.get(searchUrl, {
         headers: {
             "Content-Type": "application/json",
@@ -165,50 +119,57 @@ async function getCommentsById(params) {
         throw new Error("获取数据失败");
     }
 
-    const searchData = response.data;
+    const searchResult = response.data;
 
-    // 检查API返回状态
-    if (!searchData.success) {
-        throw new Error(searchData.errorMessage || "API调用失败");
+    if (!searchResult.success) {
+        throw new Error(searchResult.errorMessage || "API调用失败");
     }
 
-    if (searchData.animes && Array.isArray(searchData.animes) && searchData.animes.length > 0) {
-        const result = await getCommentsFromServer(searchData, server, tmdbId, type, title, season, episode);
-        if (result) {
-            return result;
-        }
-    } else {
-        console.log('未找到相关剧集');
-        return null;
+    if (!searchResult.animes || searchResult.animes.length === 0) {
+        return {
+            animes: []
+        };
     }
-}
 
-async function getCommentsFromServer(searchData, server, tmdbId, type, title, season, episode) {
+    const anime = searchResult.animes[0];
 
-    let animes = [];
-    animes = searchData.animes.filter((anime) => {
-        if (
-            (anime.type === "tvseries" || anime.type === "web") &&
-            type === "tv"
-        ) {
-            return true;
-        } else if (anime.type === "movie" && type === "movie") {
-            return true;
+    const sources = await getSourcesInfo({ server_host, api_key, animeId: anime.animeId });
+
+    const resultAnimes = anime.episodes.map((episode, index) => {
+        let animeTitle;
+
+        if (sources && sources[index] && sources[index].providerName) {
+            const source = sources[index];
+            const providerName = source.providerName;
+            const displayName = PROVIDER_NAMES[providerName] || providerName;
+
+            if (anime.type === "movie") {
+                animeTitle = `[${displayName}] ${anime.animeTitle}`;
+            } else {
+                animeTitle = `[${displayName}] ${episode.episodeTitle}`;
+            }
         } else {
-            return false;
+            if (anime.type === "movie") {
+                animeTitle = anime.animeTitle;
+            } else {
+                animeTitle = episode.episodeTitle;
+            }
         }
+
+        return {
+            commentId: episode.episodeId,
+            animeTitle
+        };
     });
 
-    let commentId;
-    const anime = animes[0];
-    if (anime.episodes && anime.episodes.length > 0) {
-        const firstEpisode = anime.episodes[0];
-        console.log(`找到分集: ${firstEpisode.episodeTitle} (ID: ${firstEpisode.episodeId})`);
-        commentId = firstEpisode.episodeId;
-    } else {
-        console.log('未找到分集信息');
-        return null;
-    }
+    return {
+        animes: resultAnimes
+    };
+}
+
+
+async function getCommentsById(params) {
+    const { animeId, commentId, server, type, title, season, episode } = params;
 
     if (commentId) {
         // 调用弹弹play弹幕API - 使用Widget.http.get
@@ -229,4 +190,34 @@ async function getCommentsFromServer(searchData, server, tmdbId, type, title, se
         return response.data;
     }
     return null;
+}
+
+
+async function getSourcesInfo(params) {
+    const { server_host, api_key, animeId } = params;
+
+    if (!server_host || !api_key || !animeId) {
+        throw new Error("缺少必要参数: server, api_key, animeId");
+    }
+
+    let requestUrl = `${server_host}/api/control/library/anime/${animeId}/sources?api_key=${api_key}`;
+
+    try {
+        const response = await Widget.http.get(requestUrl, {
+            headers: {
+                "Content-Type": "application/json",
+                "User-Agent": "ForwardWidgets/1.0.0",
+            },
+        });
+
+        if (response && response.data) {
+            return response.data;
+        } else {
+            console.warn("响应数据为空，返回null");
+            return null;
+        }
+    } catch (error) {
+        console.error(`获取数据源失败: ${error.message}`);
+        return null;
+    }
 }
