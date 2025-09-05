@@ -60,14 +60,6 @@ WidgetMetadata = {
             params: [],
         },
         {
-            //id需固定为getDetail
-            id: "getDetail",
-            title: "获取详情",
-            functionName: "getDetailById",
-            type: "danmu",
-            params: [],
-        },
-        {
             //id需固定为getComments
             id: "getComments",
             title: "获取弹幕",
@@ -146,7 +138,6 @@ async function searchDanmu(params) {
         animeId: anime.animeId
     });
 
-    let animes = [];
     const resultAnimes = anime.episodes.map((episode, index) => {
         let animeTitle;
 
@@ -169,107 +160,42 @@ async function searchDanmu(params) {
         }
 
         return {
-            animeId: String(episode.episodeId),
-            bangumiId: `A${anime.animeId}`,
-            animeTitle: animeTitle,
+            animeId: episode.episodeId,
+            animeTitle
         };
     });
-    if (resultAnimes.length > 0) {
-        animes = resultAnimes;
-    }
     return {
-        animes: animes
+        animes: resultAnimes
     };
 }
 
-async function getDetailById(params) {
-    const { animeId, type, title, season, episode, server, api_key } = params;
-    
-    console.log(`[DEBUG] getDetailById 接收到的参数:`, {
-        animeId: animeId,
-        type: type,
-        title: title,
-        season: season,
-        episode: episode,
-        hasServer: !!server,
-        hasApiKey: !!api_key
-    });
-    
-    // 重新搜索获取详情
-    const searchResult = await searchDanmu({ 
-        tmdbId: '', 
-        type, 
-        title, 
-        season, 
-        episode, 
-        server, 
-        api_key 
-    });
-
-    if (!searchResult || !searchResult.animes) {
-        throw new Error("获取详情失败");
-    }
-
-    // 转换格式以匹配预期的episodes格式
-    const episodes = searchResult.animes.map((anime, index) => {
-        return {
-            episodeId: anime.animeId,
-            episodeTitle: anime.animeTitle,
-            episodeNumber: String(index + 1)
-        };
-    });
-    
-    console.log(`[DEBUG] getDetailById 返回 ${episodes.length} 个episodes`);
-    return episodes;
-}
 
 async function getCommentsById(params) {
     const { animeId, commentId, tmdbId, type, title, season, episode, server, api_key } = params;
 
-    console.log(`[DEBUG] getCommentsById 接收到的参数:`, {
-        animeId: animeId,
-        animeIdType: typeof animeId,
-        commentId: commentId,
-        commentIdType: typeof commentId,
-        title: title,
-        season: season,
-        episode: episode,
-        hasServer: !!server,
-        hasApiKey: !!api_key
-    });
-
     let danmakuId = commentId ?? animeId;
-    console.log(`[DEBUG] 最终使用的danmakuId: ${danmakuId} (类型: ${typeof danmakuId})`);
+    console.log(`danmakuId: ${danmakuId}`);
 
     if (danmakuId) {
-        try {
-            // 调用弹弹play弹幕API - 使用Widget.http.get
-            const response = await Widget.http.get(
-                `${server}/api/v2/comment/${danmakuId}?withRelated=true&chConvert=1`,
-                {
-                    headers: {
-                        "Content-Type": "application/json",
-                        "User-Agent": "ForwardWidgets/1.0.0",
-                    },
-                }
-            );
-
-            if (!response) {
-                throw new Error("获取数据失败");
+        // 调用弹弹play弹幕API - 使用Widget.http.get
+        const response = await Widget.http.get(
+            `${server}/api/v2/comment/${danmakuId}?withRelated=true&chConvert=1`,
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                    "User-Agent": "ForwardWidgets/1.0.0",
+                },
             }
+        );
 
-            console.log(`[DEBUG] 成功获取弹幕数据，条数: ${response.data?.comments?.length || 0}`);
-            return response.data;
-        } catch (error) {
-            console.error(`[DEBUG] 获取弹幕失败: ${error.message}`);
-            const debug_data = generateDanmu(`获取弹幕失败: ${error.message}，animeId: ${animeId}, commentId: ${commentId}`, 2);
-            return debug_data;
+        if (!response) {
+            throw new Error("获取数据失败");
         }
+
+        return response.data;
     }
-    
-    console.log(`[DEBUG] 没有有效的danmakuId，返回调试弹幕`);
-    const debug_data = generateDanmu(`未读取到弹幕，animeId: ${animeId}, commentId: ${commentId}`, 2);
-    return debug_data;
+    // return null;
+    return generateDanmu(`未读取到弹幕，animeId: ${animeId}, commentId:${commentId}`, 2);
 }
 
 
