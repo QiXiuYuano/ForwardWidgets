@@ -34,7 +34,7 @@ WidgetMetadata = {
             placeholders: [
                 {
                     title: "服务器地址",
-                    value: "https://api.dandanplay.net",
+                    value: "",
                 },
             ],
         },
