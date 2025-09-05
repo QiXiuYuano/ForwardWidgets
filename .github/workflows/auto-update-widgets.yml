@@ -31,7 +31,7 @@ jobs:
           pip install packaging
 
       - name: Run generate-widget-index.js
-        run: node generate-widget-index.js
+        run: node .github/scripts/generate-widget-index.js
 
       - name: Run sync_widgets.py
         id: sync_script
