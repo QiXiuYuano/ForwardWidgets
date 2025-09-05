@@ -60,6 +60,14 @@ WidgetMetadata = {
             params: [],
         },
         {
+            //id需固定为getDetail
+            id: "getDetail",
+            title: "获取详情",
+            functionName: "searchDanmu",
+            type: "danmu",
+            params: [],
+        },
+        {
             //id需固定为getComments
             id: "getComments",
             title: "获取弹幕",
