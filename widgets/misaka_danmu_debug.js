@@ -132,13 +132,13 @@ async function searchDanmu(params) {
 
     const anime = searchResult.animes[0];
 
-    // const sources = await getSourcesInfo({
-    //     server_host,
-    //     api_key,
-    //     animeId: anime.animeId
-    // });
+    const sources = await getSourcesInfo({
+        server_host,
+        api_key,
+        animeId: anime.animeId
+    });
 
-    // let animes = [];
+    let animes = searchResult.animes;
     // const resultAnimes = anime.episodes.map((episode, index) => {
     //     let animeTitle;
 
@@ -169,7 +169,7 @@ async function searchDanmu(params) {
     //     animes = resultAnimes;
     // }
     return {
-        animes: anime
+        animes: animes
     };
 }
 
