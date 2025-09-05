@@ -138,7 +138,6 @@ async function searchDanmu(params) {
         animeId: anime.animeId
     });
 
-    let animes = [];
     const resultAnimes = anime.episodes.map((episode, index) => {
         let animeTitle;
 
@@ -161,22 +160,22 @@ async function searchDanmu(params) {
         }
 
         return {
-            animeId: String(episode.episodeId),
-            bangumiId: `A${anime.animeId}`,
-            animeTitle: animeTitle,
+            animeId: episode.episodeId,
+            animeTitle
         };
     });
-    if (resultAnimes.length > 0) {
-        animes = resultAnimes;
-    }
     return {
-        animes: animes
+        animes: resultAnimes
     };
 }
 
 
 async function getCommentsById(params) {
     const { animeId, commentId, tmdbId, type, title, season, episode, server, api_key } = params;
+
+    if (animeId){
+        return generateDanmu(`debug: animeId: ${animeId}`, 2);
+    }
 
     let danmakuId = commentId ?? animeId;
     console.log(`danmakuId: ${danmakuId}`);
