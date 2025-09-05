@@ -174,7 +174,7 @@ async function searchDanmu(params) {
 async function getCommentsById(params) {
     const { animeTitle, animeId, bangumiId, commentId, tmdbId, type, title, season, episode, server, api_key } = params;
 
-    if (!animeId && !bangumiId (&& !animeTitle){
+    if (!animeId && !bangumiId && !animeTitle){
         return generateDanmu(`debug: animeId: ${animeId}, animeTitle: ${animeTitle}`, 2);
     }
 
