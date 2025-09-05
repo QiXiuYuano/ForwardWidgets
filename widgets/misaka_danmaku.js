@@ -227,10 +227,10 @@ async function getDetailById(params) {
     }
 
     const episodes = [{
-        seasonId: season,
+        seasonId: season || '',
         episodeId: matchedEpisode.episodeId,
         episodeTitle: matchedEpisode.episodeTitle,
-        episodeNumber: episode.toString(),
+        episodeNumber: episode ? episode.toString() : '1',
         lastWatched: null,
         airDate: null
     }];
