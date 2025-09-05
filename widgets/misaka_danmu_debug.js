@@ -60,14 +60,6 @@ WidgetMetadata = {
             params: [],
         },
         {
-            //id需固定为getDetail
-            id: "getDetail",
-            title: "获取详情",
-            functionName: "searchDanmu",
-            type: "danmu",
-            params: [],
-        },
-        {
             //id需固定为getComments
             id: "getComments",
             title: "获取弹幕",
@@ -169,11 +161,9 @@ async function searchDanmu(params) {
         }
 
         return {
-            animeId: anime.animeId,
+            animeId: String(episode.episodeId),
             bangumiId: `A${anime.animeId}`,
             animeTitle: animeTitle,
-            type: anime.type,
-            episode: [episode],
         };
     });
     if (resultAnimes.length > 0) {
