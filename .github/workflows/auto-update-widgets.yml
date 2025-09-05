@@ -1,0 +1,79 @@
+name: Auto Update Widgets
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  update-widgets:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      TZ: 'Asia/Shanghai'
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install Python dependencies
+        run: |
+          pip install requests
+          pip install packaging
+
+      - name: Run generate-widget-index.js
+        run: node generate-widget-index.js
+
+      - name: Run sync_widgets.py
+        id: sync_script
+        run: python .github/scripts/sync_widgets.py
+
+      - name: Commit and push changes
+        # Only execute this step when script output status is 'updated'
+        if: steps.sync_script.outputs.status == 'updated'
+        run: |
+          git config --global user.name 'github-actions'
+          git config --global user.email 'actions@github.com'
+          git add widgets.fwd ForwardWidgets.fwd
+          git commit -m 'Auto update widgets index and sync versions'
+          git push
+
+      - name: Telegram Notification
+        env:
+          TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
+          TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
+          SYNC_STATUS: ${{ steps.sync_script.outputs.status }}
+          UPDATED_WIDGETS_B64: ${{ steps.sync_script.outputs.updated_widgets_b64 }}
+        run: |
+          CURRENT_DATE=$(date +'%Y-%m-%d %H:%M')
+          WORKFLOW_NAME="Auto Update Widgets Workflow"
+          PREFIX_MESSAGE="${CURRENT_DATE} ${WORKFLOW_NAME} 自动执行。"
+      
+          MESSAGE=""
+      
+          if [ "$SYNC_STATUS" == "updated" ]; then
+            MESSAGE="widgets.fwd 和 ForwardWidgets.fwd 已更新并提交。"
+            if [ "$UPDATED_WIDGETS_B64" != "None" ]; then
+              UPDATED_INFO=$(echo "$UPDATED_WIDGETS_B64" | base64 -d)
+              MESSAGE="${MESSAGE}\n\n更新详情：\n${UPDATED_INFO}"
+            fi
+          else
+            MESSAGE="widgets.fwd 和 ForwardWidgets.fwd 同步完成，内容已是最新。"
+          fi
+      
+          FINAL_MESSAGE="${PREFIX_MESSAGE}\n\n${MESSAGE}"
+      
+          ESCAPED_MESSAGE=$(printf "%s" "$FINAL_MESSAGE" | sed 's/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g')
+      
+          curl -s -X POST "https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{\"chat_id\": \"${TG_CHAT_ID}\", \"text\": \"${ESCAPED_MESSAGE}\"}"

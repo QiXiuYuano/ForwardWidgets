@@ -169,6 +169,7 @@ async function searchDanmu(params) {
 
         return {
             animeId: episode.episodeId,
+            bangumiId: episode.episodeId,
             animeTitle
         };
     });
@@ -179,7 +180,7 @@ async function searchDanmu(params) {
 
 
 async function getDetailById(params) {
-    const { animeId, type, title, season, episode, server } = params;
+    const { animeId, bangumiId, type, title, season, episode, server } = params;
     let queryTitle = title;
 
     if (type === "tv" && season) {
@@ -215,9 +216,10 @@ async function getDetailById(params) {
         };
     }
 
+    let targetId = animeId ?? bangumiId;
     const anime = searchResult.animes[0];
     // 构建目标格式的 episodes 数据
-    const matchedEpisode = anime.episodes.find(ep => ep.episodeId == animeId);
+    const matchedEpisode = anime.episodes.find(ep => ep.episodeId == targetId);
     if (!matchedEpisode) {
         return {
             episodes: []
