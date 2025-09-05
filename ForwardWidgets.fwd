@@ -13,6 +13,15 @@
       "url": "https://raw.githubusercontent.com/QiXiuYuano/ForwardWidgets/refs/heads/main/widgets/misaka_danmu_debug.js"
     },
     {
+      "id": "misaka.danmaku",
+      "title": "御坂弹幕模块",
+      "description": "御坂弹幕模块，实现多弹幕源间切换、弹幕自动下载",
+      "requiredVersion": "0.0.2",
+      "version": "0.0.3",
+      "author": "QiXiuYuano",
+      "url": "https://raw.githubusercontent.com/QiXiuYuano/ForwardWidgets/refs/heads/main/widgets/misaka_danmaku.js"
+    },
+    {
       "id": "trakt",
       "title": "Trakt我看&Trakt个性化推荐",
       "description": "解析Trakt想看、在看、已看、片单、追剧日历以及根据个人数据生成的个性化推荐",
