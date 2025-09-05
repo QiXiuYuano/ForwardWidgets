@@ -3,7 +3,7 @@
 
 # 特定文件使用LF换行符
 .gitignore eol=lf
-forward-widgets.fwd eol=lf
+*.fwd eol=lf
 
 # 特定文件类型使用CRLF换行符（Windows）
 *.bat eol=crlf

@@ -16,7 +16,9 @@ Thumbs.db
 # Generated files
 widgets/danmu.js
 test/
-# generate-widget-index.js
+generate-widget-index.js
 temp_widgets/
-# forward-widgets.fwd
+sync-local-widgets.py
+update-widgets.js
+update-widgets.bat
 misaka_danmu_download_backup.js
