@@ -132,41 +132,44 @@ async function searchDanmu(params) {
 
     const anime = searchResult.animes[0];
 
-    const sources = await getSourcesInfo({
-        server_host,
-        api_key,
-        animeId: anime.animeId
-    });
+    // const sources = await getSourcesInfo({
+    //     server_host,
+    //     api_key,
+    //     animeId: anime.animeId
+    // });
 
-    const resultAnimes = anime.episodes.map((episode, index) => {
-        let animeTitle;
+    // let animes = [];
+    // const resultAnimes = anime.episodes.map((episode, index) => {
+    //     let animeTitle;
 
-        if (sources && sources[index] && sources[index].providerName) {
-            const source = sources[index];
-            const providerName = source.providerName;
-            const displayName = PROVIDER_NAMES[providerName] || providerName;
+    //     if (sources && sources[index] && sources[index].providerName) {
+    //         const source = sources[index];
+    //         const providerName = source.providerName;
+    //         const displayName = PROVIDER_NAMES[providerName] || providerName;
 
-            if (anime.type === "movie") {
-                animeTitle = `[${displayName}] ${anime.animeTitle}`;
-            } else {
-                animeTitle = `[${displayName}] ${episode.episodeTitle}`;
-            }
-        } else {
-            if (anime.type === "movie") {
-                animeTitle = anime.animeTitle;
-            } else {
-                animeTitle = episode.episodeTitle;
-            }
-        }
+    //         if (anime.type === "movie") {
+    //             animeTitle = `[${displayName}] ${anime.animeTitle}`;
+    //         } else {
+    //             animeTitle = `[${displayName}] ${episode.episodeTitle}`;
+    //         }
+    //     } else {
+    //         if (anime.type === "movie") {
+    //             animeTitle = anime.animeTitle;
+    //         } else {
+    //             animeTitle = episode.episodeTitle;
+    //         }
+    //     }
 
-        return {
-            animeId: episode.episodeId,
-            animeTitle
-        };
-    });
-
+    //     return {
+    //         animeId: episode.episodeId,
+    //         animeTitle
+    //     };
+    // });
+    // if (resultAnimes.length > 0) {
+    //     animes = resultAnimes;
+    // }
     return {
-        animes: resultAnimes
+        animes: anime
     };
 }
 
