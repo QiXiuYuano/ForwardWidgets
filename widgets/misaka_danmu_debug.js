@@ -146,36 +146,39 @@ async function searchDanmu(params) {
         animeId: anime.animeId
     });
 
-    let animes = searchResult.animes;
-    // const resultAnimes = anime.episodes.map((episode, index) => {
-    //     let animeTitle;
+    let animes = [];
+    const resultAnimes = anime.episodes.map((episode, index) => {
+        let animeTitle;
 
-    //     if (sources && sources[index] && sources[index].providerName) {
-    //         const source = sources[index];
-    //         const providerName = source.providerName;
-    //         const displayName = PROVIDER_NAMES[providerName] || providerName;
+        if (sources && sources[index] && sources[index].providerName) {
+            const source = sources[index];
+            const providerName = source.providerName;
+            const displayName = PROVIDER_NAMES[providerName] || providerName;
 
-    //         if (anime.type === "movie") {
-    //             animeTitle = `[${displayName}] ${anime.animeTitle}`;
-    //         } else {
-    //             animeTitle = `[${displayName}] ${episode.episodeTitle}`;
-    //         }
-    //     } else {
-    //         if (anime.type === "movie") {
-    //             animeTitle = anime.animeTitle;
-    //         } else {
-    //             animeTitle = episode.episodeTitle;
-    //         }
-    //     }
+            if (anime.type === "movie") {
+                animeTitle = `[${displayName}] ${anime.animeTitle}`;
+            } else {
+                animeTitle = `[${displayName}] ${episode.episodeTitle}`;
+            }
+        } else {
+            if (anime.type === "movie") {
+                animeTitle = anime.animeTitle;
+            } else {
+                animeTitle = episode.episodeTitle;
+            }
+        }
 
-    //     return {
-    //         animeId: episode.episodeId,
-    //         animeTitle
-    //     };
-    // });
-    // if (resultAnimes.length > 0) {
-    //     animes = resultAnimes;
-    // }
+        return {
+            animeId: anime.animeId,
+            bangumiId: `A${anime.animeId}`,
+            animeTitle: animeTitle,
+            type: anime.type,
+            episode: [episode],
+        };
+    });
+    if (resultAnimes.length > 0) {
+        animes = resultAnimes;
+    }
     return {
         animes: animes
     };
