@@ -21,7 +21,7 @@
 WidgetMetadata = {
     id: "misaka.danmaku",
     title: "御坂弹幕模块",
-    version: "0.0.3",
+    version: "0.0.4",
     requiredVersion: "0.0.2",
     description: "御坂弹幕模块，实现多弹幕源间切换、弹幕自动下载",
     author: "QiXiuYuano",
