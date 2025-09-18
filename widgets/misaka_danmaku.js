@@ -126,7 +126,17 @@ async function searchDanmu(params) {
 
     if (!searchResult.animes || searchResult.animes.length === 0) {
         return {
-            animes: []
+            animes: [
+                {
+                    animeTitle: title,
+                    tmdbId: tmdbId,
+                    type: type,
+                    season: season,
+                    episode: episode,   
+                    rating: 0,
+                    isFavorited: false
+                }
+            ]
         };
     }
 
