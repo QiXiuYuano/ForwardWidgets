@@ -23,7 +23,7 @@ WidgetMetadata = {
     title: "御坂弹幕模块",
     version: "1.0.1",
     requiredVersion: "0.0.2",
-    description: "御坂弹幕模块，显示弹幕源、弹幕自动下载",
+    description: "御坂弹幕模块，支持弹幕匹配及自动下载",
     author: "QiXiuYuano",
     site: "https://github.com/QiXiuYuano/ForwardWidgets",
     globalParams: [
@@ -38,6 +38,7 @@ WidgetMetadata = {
                 },
             ],
         }
+    ],
     modules: [
         {
             //id需固定为searchDanmu
