@@ -128,10 +128,9 @@ async function searchDanmu(params) {
 async function getComments(params) {
     const { animeId, type, title, season, episode, server } = params;
 
-    let commentId = animeId;
-
-    if (commentId) {
+    if (animeId) {
         try {
+            let commentId = animeId;
             const response = await Widget.http.get(
                 `${server}/api/v2/comment/${commentId}?withRelated=true&chConvert=1`,
                 {
