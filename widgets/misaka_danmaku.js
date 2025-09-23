@@ -109,7 +109,7 @@ async function searchDanmu(params) {
         return {
             animes: [
                 {
-                    episodeId: anime.episodeId,
+                    animeId: anime.episodeId,
                     animeTitle: anime.animeTitle,
                     episodeTitle: anime.episodeTitle
                 }
@@ -126,9 +126,9 @@ async function searchDanmu(params) {
 
 
 async function getComments(params) {
-    const { episodeId, type, title, season, episode, server } = params;
+    const { animeId, type, title, season, episode, server } = params;
 
-    let commentId = episodeId;
+    let commentId = animeId;
 
     if (commentId) {
         try {
