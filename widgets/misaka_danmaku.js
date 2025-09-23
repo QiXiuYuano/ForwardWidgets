@@ -95,6 +95,7 @@ async function searchDanmu(params) {
                 animes: [
                     {
                         animeTitle: title,
+                        episodeTitle: "库中未匹配到资源, 触发下载",
                         tmdbId: tmdbId,
                         type: type,
                         season: season,
