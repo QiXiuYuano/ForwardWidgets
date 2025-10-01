@@ -37,7 +37,7 @@ WidgetMetadata = {
                     value: "",
                 },
             ],
-        }
+        },
     ],
     modules: [
         {
